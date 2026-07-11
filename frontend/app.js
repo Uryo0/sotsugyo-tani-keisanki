@@ -131,6 +131,42 @@ function renumberCustomSubjects() {
   }
 }
 
+// 画面を切り替える
+function showView(viewName) {
+  document.getElementById("mainView").classList.add("hidden-view");
+  document.getElementById("addView").classList.add("hidden-view");
+  document.getElementById("deleteView").classList.add("hidden-view");
+
+  if (viewName === "add") {
+    document.getElementById("addView").classList.remove("hidden-view");
+    setMessage("addMessage", "");
+    return;
+  }
+
+  if (viewName === "delete") {
+    document.getElementById("deleteView").classList.remove("hidden-view");
+    setMessage("deleteMessage", "");
+    renderDeleteSubjects();
+    return;
+  }
+
+  document.getElementById("mainView").classList.remove("hidden-view");
+  renderSubjects();
+  renderResult();
+}
+
+// メッセージを表示する
+function setMessage(id, text) {
+  const area = document.getElementById(id);
+  area.textContent = text;
+
+  if (text === "") {
+    area.classList.remove("show-message");
+  } else {
+    area.classList.add("show-message");
+  }
+}
+
 // セレクトボックスを作る
 function setupSelectOptions() {
   setupFilterSelect("categorySelect", getUniqueValues("category"), "すべての分類");
@@ -311,9 +347,10 @@ function getFilteredSubjects() {
   const filteredSubjects = [];
 
   for (const subject of subjects) {
-    const name = subject.name.toLowerCase();
+    const oldName = subject.old_name === null ? "" : subject.old_name;
+    const searchTarget = (subject.name + " " + oldName).toLowerCase();
 
-    if (searchText !== "" && !name.includes(searchText)) {
+    if (searchText !== "" && !searchTarget.includes(searchText)) {
       continue;
     }
 
@@ -347,7 +384,6 @@ function renderSubjects() {
 
     html += "<tr" + rowClass + ">";
     html += "<td class='check-column'><input class='subject-check' type='checkbox' data-id='" + escapeHtml(subject.id) + "' " + checked + "></td>";
-    html += "<td>" + escapeHtml(subject.id) + "</td>";
     html += "<td>" + escapeHtml(subject.name) + "</td>";
     html += "<td>" + escapeHtml(subject.credits) + "</td>";
     html += "<td>" + escapeHtml(subject.category) + "</td>";
@@ -370,6 +406,33 @@ function renderSubjects() {
   }
 
   document.getElementById("shownCount").textContent = "表示 " + filteredSubjects.length + "科目";
+}
+
+// 削除画面の追加科目を表示する
+function renderDeleteSubjects() {
+  const tbody = document.getElementById("deleteSubjectTableBody");
+  let html = "";
+
+  if (customSubjects.length === 0) {
+    tbody.innerHTML = "<tr><td colspan='9'>追加した科目はありません</td></tr>";
+    return;
+  }
+
+  for (const subject of customSubjects) {
+    html += "<tr class='added-subject-row'>";
+    html += "<td class='check-column'><input class='delete-subject-check' type='checkbox' data-id='" + escapeHtml(subject.id) + "'></td>";
+    html += "<td>" + escapeHtml(subject.name) + "</td>";
+    html += "<td>" + escapeHtml(subject.credits) + "</td>";
+    html += "<td>" + escapeHtml(subject.category) + "</td>";
+    html += "<td>" + escapeHtml(subject.sub_category) + "</td>";
+    html += "<td>" + escapeHtml(subject.field) + "</td>";
+    html += "<td>" + getRequirementBadge(subject.requirement_type) + "</td>";
+    html += "<td>" + escapeHtml(subject.class_type) + "</td>";
+    html += "<td>" + escapeHtml(subject.old_name) + "</td>";
+    html += "</tr>";
+  }
+
+  tbody.innerHTML = html;
 }
 
 // 追加科目かどうか調べる
@@ -434,7 +497,7 @@ function addSubject() {
   let field = document.getElementById("addFieldSelect").value;
 
   if (name === "") {
-    alert("科目名を入力してください");
+    setMessage("addMessage", "科目名を入力してください");
     return;
   }
 
@@ -442,7 +505,7 @@ function addSubject() {
     field = document.getElementById("addNewFieldInput").value.trim();
 
     if (field === "") {
-      alert("新しい分野を入力してください");
+      setMessage("addMessage", "新しい分野を入力してください");
       return;
     }
   }
@@ -466,6 +529,7 @@ function addSubject() {
   setupSelectOptions();
   renderSubjects();
   renderResult();
+  setMessage("addMessage", "科目を追加しました");
 }
 
 // 追加フォームを空にする
@@ -477,20 +541,17 @@ function clearAddForm() {
 
 // 選択した追加科目を削除する
 function deleteSelectedAddedSubjects() {
+  const checks = document.querySelectorAll(".delete-subject-check");
   const deleteIds = [];
 
-  for (const id of selectedIds) {
-    if (isCustomSubject(id)) {
-      deleteIds.push(id);
+  for (const check of checks) {
+    if (check.checked) {
+      deleteIds.push(check.dataset.id);
     }
   }
 
   if (deleteIds.length === 0) {
-    alert("削除する追加科目を選択してください");
-    return;
-  }
-
-  if (!confirm("選択した追加科目を削除しますか？")) {
+    setMessage("deleteMessage", "削除する追加科目を選択してください");
     return;
   }
 
@@ -521,6 +582,8 @@ function deleteSelectedAddedSubjects() {
   setupSelectOptions();
   renderSubjects();
   renderResult();
+  renderDeleteSubjects();
+  setMessage("deleteMessage", "追加科目を削除しました");
 }
 
 // 削除後に選択中IDも直す
@@ -776,9 +839,25 @@ function setupEvents() {
     renderResult();
   });
 
+  document.getElementById("openAddViewButton").addEventListener("click", function () {
+    showView("add");
+  });
+
+  document.getElementById("openDeleteViewButton").addEventListener("click", function () {
+    showView("delete");
+  });
+
+  document.getElementById("backFromAddButton").addEventListener("click", function () {
+    showView("main");
+  });
+
+  document.getElementById("backFromDeleteButton").addEventListener("click", function () {
+    showView("main");
+  });
+
   document.getElementById("addFieldSelect").addEventListener("change", updateNewFieldInput);
   document.getElementById("addSubjectButton").addEventListener("click", addSubject);
-  document.getElementById("deleteSubjectButton").addEventListener("click", deleteSelectedAddedSubjects);
+  document.getElementById("deleteAddedSubjectButton").addEventListener("click", deleteSelectedAddedSubjects);
 
   document.getElementById("saveButton").addEventListener("click", function () {
     saveAllData();
@@ -798,5 +877,4 @@ function setupEvents() {
 loadData();
 setupSelectOptions();
 setupEvents();
-renderSubjects();
-renderResult();
+showView("main");

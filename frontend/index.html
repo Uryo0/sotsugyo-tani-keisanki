@@ -19,7 +19,7 @@
     </div>
   </header>
 
-  <main class="main-layout">
+  <main id="mainView" class="view main-layout">
     <section class="left-area">
       <div id="requirementList" class="requirement-list"></div>
 
@@ -36,7 +36,7 @@
 
     <section class="right-area">
       <div class="toolbar">
-        <input id="searchInput" type="search" placeholder="科目名で検索">
+        <input id="searchInput" type="search" placeholder="科目名・旧科目名で検索">
 
         <select id="categorySelect">
           <option value="all">すべての分類</option>
@@ -53,60 +53,9 @@
         <select id="mainLanguageSelect" title="メイン外国語"></select>
 
         <button id="saveButton" type="button">保存</button>
-        <button id="deleteSubjectButton" type="button" class="danger-button">選択した追加科目を削除</button>
+        <button id="openAddViewButton" type="button">科目を追加</button>
+        <button id="openDeleteViewButton" type="button" class="danger-button">追加した科目を削除</button>
         <button id="clearButton" type="button" class="danger-button">クリア</button>
-      </div>
-
-      <div class="subject-form">
-        <h2>科目を追加</h2>
-        <div class="form-grid">
-          <label>
-            <span>科目名</span>
-            <input id="addNameInput" type="text">
-          </label>
-
-          <label>
-            <span>単位数</span>
-            <select id="addCreditsSelect"></select>
-          </label>
-
-          <label>
-            <span>分類</span>
-            <select id="addCategorySelect"></select>
-          </label>
-
-          <label>
-            <span>区分</span>
-            <select id="addSubCategorySelect"></select>
-          </label>
-
-          <label>
-            <span>分野</span>
-            <select id="addFieldSelect"></select>
-          </label>
-
-          <label id="newFieldLabel" class="hidden-field">
-            <span>新しい分野</span>
-            <input id="addNewFieldInput" type="text">
-          </label>
-
-          <label>
-            <span>必選別</span>
-            <select id="addRequirementSelect"></select>
-          </label>
-
-          <label>
-            <span>授業形態</span>
-            <select id="addClassTypeSelect"></select>
-          </label>
-
-          <label>
-            <span>旧科目名</span>
-            <input id="addOldNameInput" type="text">
-          </label>
-
-          <button id="addSubjectButton" type="button">科目を追加</button>
-        </div>
       </div>
 
       <div class="subject-info">
@@ -119,7 +68,6 @@
           <thead>
             <tr>
               <th class="check-column">修得</th>
-              <th>ID</th>
               <th>科目名</th>
               <th>単位</th>
               <th>分類</th>
@@ -132,6 +80,100 @@
           </thead>
           <tbody id="subjectTableBody"></tbody>
         </table>
+      </div>
+    </section>
+  </main>
+
+  <main id="addView" class="view single-view hidden-view">
+    <section class="screen-panel">
+      <div class="screen-head">
+        <h2>科目を追加</h2>
+        <button id="backFromAddButton" type="button">戻る</button>
+      </div>
+
+      <p id="addMessage" class="action-message"></p>
+
+      <div class="form-grid">
+        <label>
+          <span>科目名</span>
+          <input id="addNameInput" type="text">
+        </label>
+
+        <label>
+          <span>単位数</span>
+          <select id="addCreditsSelect"></select>
+        </label>
+
+        <label>
+          <span>分類</span>
+          <select id="addCategorySelect"></select>
+        </label>
+
+        <label>
+          <span>区分</span>
+          <select id="addSubCategorySelect"></select>
+        </label>
+
+        <label>
+          <span>分野</span>
+          <select id="addFieldSelect"></select>
+        </label>
+
+        <label id="newFieldLabel" class="hidden-field">
+          <span>新しい分野</span>
+          <input id="addNewFieldInput" type="text">
+        </label>
+
+        <label>
+          <span>必選別</span>
+          <select id="addRequirementSelect"></select>
+        </label>
+
+        <label>
+          <span>授業形態</span>
+          <select id="addClassTypeSelect"></select>
+        </label>
+
+        <label>
+          <span>旧科目名</span>
+          <input id="addOldNameInput" type="text">
+        </label>
+
+        <button id="addSubjectButton" type="button">追加</button>
+      </div>
+    </section>
+  </main>
+
+  <main id="deleteView" class="view single-view hidden-view">
+    <section class="screen-panel">
+      <div class="screen-head">
+        <h2>追加した科目を削除</h2>
+        <button id="backFromDeleteButton" type="button">戻る</button>
+      </div>
+
+      <p id="deleteMessage" class="action-message"></p>
+
+      <div class="table-wrap delete-table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th class="check-column">選択</th>
+              <th>科目名</th>
+              <th>単位</th>
+              <th>分類</th>
+              <th>区分</th>
+              <th>分野</th>
+              <th>必選別</th>
+              <th>授業形態</th>
+              <th>旧科目名</th>
+            </tr>
+          </thead>
+          <tbody id="deleteSubjectTableBody"></tbody>
+        </table>
+      </div>
+
+      <div class="screen-actions">
+        <button id="deleteAddedSubjectButton" type="button" class="danger-button">削除</button>
       </div>
     </section>
   </main>
