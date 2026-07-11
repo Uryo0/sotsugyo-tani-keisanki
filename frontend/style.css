@@ -232,7 +232,8 @@ button:hover,
 }
 
 .table-wrap {
-  height: calc(100vh - 190px);
+  height: calc(100vh - 390px);
+  min-height: 300px;
   overflow: auto;
   border: 1px solid #d9e0e7;
   border-radius: 8px;
@@ -344,4 +345,54 @@ tr:hover {
 
 .requirement-child .requirement-name {
   font-weight: 500;
+}
+.subject-form {
+  margin-bottom: 10px;
+  padding: 14px;
+  border: 1px solid #d9e0e7;
+  border-radius: 8px;
+  background: #ffffff;
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(130px, 1fr));
+  gap: 10px;
+  align-items: end;
+}
+
+.form-grid label {
+  display: grid;
+  gap: 5px;
+  min-width: 0;
+}
+
+.form-grid span {
+  color: #44515e;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.form-grid input,
+.form-grid select {
+  width: 100%;
+  min-width: 0;
+}
+
+.hidden-field {
+  display: none !important;
+}
+
+.added-subject-row {
+  background: #f5fbf7;
+}
+
+.added-subject-row:hover {
+  background: #edf8f0;
+}
+
+@media (max-width: 1200px) {
+  .form-grid {
+    grid-template-columns: repeat(3, minmax(140px, 1fr));
+  }
 }

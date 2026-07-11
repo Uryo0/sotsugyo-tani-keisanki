@@ -64,6 +64,11 @@ function getLanguageName(subject) {
     }
   }
 
+  // 追加科目で新しい外国語分野を作った時に使う
+  if (subject.sub_category === "外国語" && subject.field !== "その他の外国語") {
+    return subject.field;
+  }
+
   return "その他";
 }
 

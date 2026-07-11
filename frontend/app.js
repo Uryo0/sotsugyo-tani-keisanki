@@ -1,6 +1,8 @@
 const fs = require("fs");
 const path = require("path");
 
+let baseSubjects = [];
+let customSubjects = [];
 let subjects = [];
 let requirements = {};
 let selectedIds = [];
@@ -8,6 +10,7 @@ let mainLanguage = "英語";
 
 const saveKey = "sotsugyo-tani-keisanki-selected-ids";
 const languageSaveKey = "sotsugyo-tani-keisanki-main-language";
+const customSubjectsKey = "sotsugyo-tani-keisanki-custom-subjects";
 
 // JSONファイルを読む
 function readJson(filePath) {
@@ -16,15 +19,35 @@ function readJson(filePath) {
   return JSON.parse(text);
 }
 
+// 画面に文字を出す時の安全対策
+function escapeHtml(value) {
+  if (value === null || value === undefined) {
+    return "";
+  }
+
+  return String(value)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
+}
+
+// add001 のようなIDを作る
+function makeAddId(number) {
+  return "add" + String(number).padStart(3, "0");
+}
+
 // 最初にデータを読む
 function loadData() {
   const rootPath = path.join(__dirname, "..");
 
-  subjects = readJson(path.join(rootPath, "data", "subjects.json"));
+  baseSubjects = readJson(path.join(rootPath, "data", "subjects.json"));
   requirements = readJson(path.join(rootPath, "data", "requirements.json"));
 
   const savedText = localStorage.getItem(saveKey);
   const savedLanguage = localStorage.getItem(languageSaveKey);
+  const savedCustomSubjects = localStorage.getItem(customSubjectsKey);
 
   if (savedText !== null) {
     selectedIds = JSON.parse(savedText);
@@ -33,6 +56,20 @@ function loadData() {
   if (savedLanguage !== null) {
     mainLanguage = savedLanguage;
   }
+
+  if (savedCustomSubjects !== null) {
+    customSubjects = JSON.parse(savedCustomSubjects);
+  }
+
+  renumberCustomSubjects();
+  rebuildSubjects();
+  cleanSelectedIds();
+  saveAllData();
+}
+
+// 元の科目と追加科目を合わせる
+function rebuildSubjects() {
+  subjects = baseSubjects.concat(customSubjects);
 }
 
 // 選択状態を保存する
@@ -45,31 +82,130 @@ function saveMainLanguage() {
   localStorage.setItem(languageSaveKey, mainLanguage);
 }
 
-// セレクトボックスを作る
-function setupSelectOptions() {
-  setOptions("categorySelect", getUniqueValues("category"));
-  setOptions("subCategorySelect", getUniqueValues("sub_category"));
-  setOptions("requirementSelect", getUniqueValues("requirement_type"));
-  setupMainLanguageOptions();
+// 追加科目を保存する
+function saveCustomSubjects() {
+  localStorage.setItem(customSubjectsKey, JSON.stringify(customSubjects));
 }
 
-// 重複しない値を取り出す
-function getUniqueValues(key) {
-  const values = [];
+// 必要なデータをまとめて保存する
+function saveAllData() {
+  saveSelectedIds();
+  saveMainLanguage();
+  saveCustomSubjects();
+}
+
+// 存在しないIDを選択状態から外す
+function cleanSelectedIds() {
+  const subjectIds = [];
+  const newSelectedIds = [];
 
   for (const subject of subjects) {
-    if (!values.includes(subject[key])) {
-      values.push(subject[key]);
+    subjectIds.push(subject.id);
+  }
+
+  for (const id of selectedIds) {
+    if (subjectIds.includes(id) && !newSelectedIds.includes(id)) {
+      newSelectedIds.push(id);
     }
   }
 
-  return values;
+  selectedIds = newSelectedIds;
+}
+
+// 追加科目のIDを add001 から順に振り直す
+function renumberCustomSubjects() {
+  const idMap = {};
+
+  for (let i = 0; i < customSubjects.length; i++) {
+    const oldId = customSubjects[i].id;
+    const newId = makeAddId(i + 1);
+
+    idMap[oldId] = newId;
+    customSubjects[i].id = newId;
+  }
+
+  for (let i = 0; i < selectedIds.length; i++) {
+    if (idMap[selectedIds[i]] !== undefined) {
+      selectedIds[i] = idMap[selectedIds[i]];
+    }
+  }
+}
+
+// セレクトボックスを作る
+function setupSelectOptions() {
+  setupFilterSelect("categorySelect", getUniqueValues("category"), "すべての分類");
+  setupFilterSelect("subCategorySelect", getUniqueValues("sub_category"), "すべての区分");
+  setupFilterSelect("requirementSelect", getUniqueValues("requirement_type"), "すべての必選別");
+  setupMainLanguageOptions();
+  setupAddSubjectOptions();
+}
+
+// フィルター用のセレクトボックスを作る
+function setupFilterSelect(selectId, values, allText) {
+  const select = document.getElementById(selectId);
+  const currentValue = select.value || "all";
+
+  select.innerHTML = "";
+
+  const allOption = document.createElement("option");
+  allOption.value = "all";
+  allOption.textContent = allText;
+  select.appendChild(allOption);
+
+  addOptions(select, values);
+
+  if (hasOption(select, currentValue)) {
+    select.value = currentValue;
+  } else {
+    select.value = "all";
+  }
+}
+
+// 追加フォームのセレクトボックスを作る
+function setupAddSubjectOptions() {
+  setupPlainSelect("addCreditsSelect", getCreditValues());
+  setupPlainSelect("addCategorySelect", getUniqueValues("category"));
+  setupPlainSelect("addSubCategorySelect", getUniqueValues("sub_category"));
+  setupFieldSelect();
+  setupPlainSelect("addRequirementSelect", getUniqueValues("requirement_type"));
+  setupPlainSelect("addClassTypeSelect", getUniqueValues("class_type"));
+}
+
+// 普通のセレクトボックスを作る
+function setupPlainSelect(selectId, values) {
+  const select = document.getElementById(selectId);
+  const currentValue = select.value;
+
+  select.innerHTML = "";
+  addOptions(select, values);
+
+  if (hasOption(select, currentValue)) {
+    select.value = currentValue;
+  }
+}
+
+// 分野のセレクトボックスを作る
+function setupFieldSelect() {
+  const select = document.getElementById("addFieldSelect");
+  const currentValue = select.value;
+
+  select.innerHTML = "";
+  addOptions(select, getUniqueValues("field"));
+
+  const newOption = document.createElement("option");
+  newOption.value = "__new__";
+  newOption.textContent = "新しく追加";
+  select.appendChild(newOption);
+
+  if (hasOption(select, currentValue)) {
+    select.value = currentValue;
+  }
+
+  updateNewFieldInput();
 }
 
 // セレクトボックスに項目を入れる
-function setOptions(selectId, values) {
-  const select = document.getElementById(selectId);
-
+function addOptions(select, values) {
   for (const value of values) {
     const option = document.createElement("option");
     option.value = value;
@@ -78,10 +214,50 @@ function setOptions(selectId, values) {
   }
 }
 
+// セレクトボックスに指定した値があるか調べる
+function hasOption(select, value) {
+  for (const option of select.options) {
+    if (option.value === value) {
+      return true;
+    }
+  }
+
+  return false;
+}
+
+// 重複しない値を取り出す
+function getUniqueValues(key) {
+  const values = [];
+
+  for (const subject of subjects) {
+    const value = subject[key];
+
+    if (value !== null && value !== undefined && value !== "" && !values.includes(value)) {
+      values.push(value);
+    }
+  }
+
+  return values;
+}
+
+// 単位数の選択肢を取り出す
+function getCreditValues() {
+  const values = getUniqueValues("credits");
+
+  values.sort(function (a, b) {
+    return Number(a) - Number(b);
+  });
+
+  return values;
+}
+
 // メイン外国語の選択肢を作る
 function setupMainLanguageOptions() {
   const select = document.getElementById("mainLanguageSelect");
+  const currentValue = mainLanguage;
   const languages = getLanguageValues();
+
+  select.innerHTML = "";
 
   for (const language of languages) {
     const option = document.createElement("option");
@@ -90,7 +266,12 @@ function setupMainLanguageOptions() {
     select.appendChild(option);
   }
 
-  select.value = mainLanguage;
+  if (hasOption(select, currentValue)) {
+    select.value = currentValue;
+  } else if (languages.length > 0) {
+    mainLanguage = languages[0];
+    select.value = mainLanguage;
+  }
 }
 
 // 科目データから外国語を取り出す
@@ -104,6 +285,16 @@ function getLanguageValues() {
         if (getLanguageName(subject) === language && !values.includes(language)) {
           values.push(language);
         }
+      }
+    }
+  }
+
+  for (const subject of subjects) {
+    if (subject.sub_category === "外国語" && subject.requirement_type === "選択必修") {
+      const language = getLanguageName(subject);
+
+      if (!values.includes(language)) {
+        values.push(language);
       }
     }
   }
@@ -152,15 +343,19 @@ function renderSubjects() {
 
   for (const subject of filteredSubjects) {
     const checked = selectedIds.includes(subject.id) ? "checked" : "";
+    const rowClass = isCustomSubject(subject.id) ? " class='added-subject-row'" : "";
 
-    html += "<tr>";
-    html += "<td class='check-column'><input class='subject-check' type='checkbox' data-id='" + subject.id + "' " + checked + "></td>";
-    html += "<td>" + subject.name + "</td>";
-    html += "<td>" + subject.credits + "</td>";
-    html += "<td>" + subject.category + "</td>";
-    html += "<td>" + subject.sub_category + "</td>";
-    html += "<td>" + subject.field + "</td>";
+    html += "<tr" + rowClass + ">";
+    html += "<td class='check-column'><input class='subject-check' type='checkbox' data-id='" + escapeHtml(subject.id) + "' " + checked + "></td>";
+    html += "<td>" + escapeHtml(subject.id) + "</td>";
+    html += "<td>" + escapeHtml(subject.name) + "</td>";
+    html += "<td>" + escapeHtml(subject.credits) + "</td>";
+    html += "<td>" + escapeHtml(subject.category) + "</td>";
+    html += "<td>" + escapeHtml(subject.sub_category) + "</td>";
+    html += "<td>" + escapeHtml(subject.field) + "</td>";
     html += "<td>" + getRequirementBadge(subject.requirement_type) + "</td>";
+    html += "<td>" + escapeHtml(subject.class_type) + "</td>";
+    html += "<td>" + escapeHtml(subject.old_name) + "</td>";
     html += "</tr>";
   }
 
@@ -175,6 +370,11 @@ function renderSubjects() {
   }
 
   document.getElementById("shownCount").textContent = "表示 " + filteredSubjects.length + "科目";
+}
+
+// 追加科目かどうか調べる
+function isCustomSubject(subjectId) {
+  return subjectId.startsWith("add");
 }
 
 // 必選別の見た目を変える
@@ -208,6 +408,138 @@ function toggleSubject(subjectId, checked) {
 
   saveSelectedIds();
   renderResult();
+}
+
+// 追加フォームの分野入力欄を切り替える
+function updateNewFieldInput() {
+  const fieldSelect = document.getElementById("addFieldSelect");
+  const newFieldLabel = document.getElementById("newFieldLabel");
+
+  if (fieldSelect.value === "__new__") {
+    newFieldLabel.classList.remove("hidden-field");
+  } else {
+    newFieldLabel.classList.add("hidden-field");
+  }
+}
+
+// 科目を追加する
+function addSubject() {
+  const name = document.getElementById("addNameInput").value.trim();
+  const credits = Number(document.getElementById("addCreditsSelect").value);
+  const category = document.getElementById("addCategorySelect").value;
+  const subCategory = document.getElementById("addSubCategorySelect").value;
+  const requirementType = document.getElementById("addRequirementSelect").value;
+  const classType = document.getElementById("addClassTypeSelect").value;
+  const oldNameInput = document.getElementById("addOldNameInput").value.trim();
+  let field = document.getElementById("addFieldSelect").value;
+
+  if (name === "") {
+    alert("科目名を入力してください");
+    return;
+  }
+
+  if (field === "__new__") {
+    field = document.getElementById("addNewFieldInput").value.trim();
+
+    if (field === "") {
+      alert("新しい分野を入力してください");
+      return;
+    }
+  }
+
+  const subject = {
+    id: makeAddId(customSubjects.length + 1),
+    name: name,
+    credits: credits,
+    requirement_type: requirementType,
+    category: category,
+    sub_category: subCategory,
+    field: field,
+    class_type: classType,
+    old_name: oldNameInput === "" ? null : oldNameInput
+  };
+
+  customSubjects.push(subject);
+  rebuildSubjects();
+  saveCustomSubjects();
+  clearAddForm();
+  setupSelectOptions();
+  renderSubjects();
+  renderResult();
+}
+
+// 追加フォームを空にする
+function clearAddForm() {
+  document.getElementById("addNameInput").value = "";
+  document.getElementById("addOldNameInput").value = "";
+  document.getElementById("addNewFieldInput").value = "";
+}
+
+// 選択した追加科目を削除する
+function deleteSelectedAddedSubjects() {
+  const deleteIds = [];
+
+  for (const id of selectedIds) {
+    if (isCustomSubject(id)) {
+      deleteIds.push(id);
+    }
+  }
+
+  if (deleteIds.length === 0) {
+    alert("削除する追加科目を選択してください");
+    return;
+  }
+
+  if (!confirm("選択した追加科目を削除しますか？")) {
+    return;
+  }
+
+  const idMap = {};
+  const newCustomSubjects = [];
+  let nextNumber = 1;
+
+  for (const subject of customSubjects) {
+    if (deleteIds.includes(subject.id)) {
+      continue;
+    }
+
+    const oldId = subject.id;
+    const newSubject = Object.assign({}, subject);
+
+    newSubject.id = makeAddId(nextNumber);
+    idMap[oldId] = newSubject.id;
+    newCustomSubjects.push(newSubject);
+    nextNumber++;
+  }
+
+  customSubjects = newCustomSubjects;
+  selectedIds = updateSelectedIdsAfterDelete(deleteIds, idMap);
+
+  rebuildSubjects();
+  cleanSelectedIds();
+  saveAllData();
+  setupSelectOptions();
+  renderSubjects();
+  renderResult();
+}
+
+// 削除後に選択中IDも直す
+function updateSelectedIdsAfterDelete(deleteIds, idMap) {
+  const newSelectedIds = [];
+
+  for (const id of selectedIds) {
+    if (deleteIds.includes(id)) {
+      continue;
+    }
+
+    if (idMap[id] !== undefined) {
+      newSelectedIds.push(idMap[id]);
+    } else {
+      newSelectedIds.push(id);
+    }
+  }
+
+  return newSelectedIds;
 }
 
 // 計算結果を表示する
@@ -360,6 +692,7 @@ function renderChildItems(checks, names) {
 
   return html;
 }
+
 // 要件の一覧を階層で表示する
 function renderRequirementList(checks) {
   const area = document.getElementById("requirementList");
@@ -408,7 +741,7 @@ function renderMissingRequired(missingSubjects) {
   let html = "";
 
   for (const subject of missingSubjects) {
-    html += "<li>" + subject.name + "（" + subject.credits + "単位）</li>";
+    html += "<li>" + escapeHtml(subject.name) + "（" + escapeHtml(subject.credits) + "単位）</li>";
   }
 
   list.innerHTML = html;
@@ -420,7 +753,7 @@ function renderWarnings(missingRegisterSubjects) {
   let html = "";
 
   for (const subject of missingRegisterSubjects) {
-    html += "<li>登録必須: " + subject.name + "</li>";
+    html += "<li>登録必須: " + escapeHtml(subject.name) + "</li>";
   }
 
   if (html === "") {
@@ -428,50 +761,6 @@ function renderWarnings(missingRegisterSubjects) {
   }
 
   list.innerHTML = html;
-}
-
-// JSONファイルとして保存する
-function exportProgress() {
-  const data = {
-    selectedIds: selectedIds,
-    mainLanguage: mainLanguage,
-    savedAt: new Date().toISOString()
-  };
-
-  const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement("a");
-
-  a.href = url;
-  a.download = "卒業単位計算機-保存データ.json";
-  a.click();
-
-  URL.revokeObjectURL(url);
-}
-
-// JSONファイルから読み込む
-function importProgress(file) {
-  const reader = new FileReader();
-
-  reader.onload = function () {
-    const data = JSON.parse(reader.result);
-
-    if (Array.isArray(data.selectedIds)) {
-      selectedIds = data.selectedIds;
-    }
-
-    if (typeof data.mainLanguage === "string") {
-      mainLanguage = data.mainLanguage;
-      document.getElementById("mainLanguageSelect").value = mainLanguage;
-    }
-
-    saveSelectedIds();
-    saveMainLanguage();
-    renderSubjects();
-    renderResult();
-  };
-
-  reader.readAsText(file);
 }
 
 // ボタンなどの動きを設定する
@@ -487,18 +776,13 @@ function setupEvents() {
     renderResult();
   });
 
+  document.getElementById("addFieldSelect").addEventListener("change", updateNewFieldInput);
+  document.getElementById("addSubjectButton").addEventListener("click", addSubject);
+  document.getElementById("deleteSubjectButton").addEventListener("click", deleteSelectedAddedSubjects);
+
   document.getElementById("saveButton").addEventListener("click", function () {
-    saveSelectedIds();
-    saveMainLanguage();
+    saveAllData();
     alert("保存しました");
-  });
-
-  document.getElementById("exportButton").addEventListener("click", exportProgress);
-
-  document.getElementById("importInput").addEventListener("change", function () {
-    if (this.files.length > 0) {
-      importProgress(this.files[0]);
-    }
   });
 
   document.getElementById("clearButton").addEventListener("click", function () {
