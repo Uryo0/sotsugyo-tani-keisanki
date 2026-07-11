@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>卒業単位計算機</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header class="top-bar">
+    <div>
+      <p class="school-name">関東学院大学 理工学部 理工学科 情報ネット・メディアコース</p>
+      <h1>卒業単位計算機</h1>
+    </div>
+
+    <div class="total-box">
+      <div><span id="totalCredits">0</span><span class="total-small"> / 124 単位</span></div>
+      <p id="graduationStatus" class="status-text">未達成</p>
+    </div>
+  </header>
+
+  <main class="main-layout">
+    <section class="left-area">
+      <div id="requirementList" class="requirement-list"></div>
+
+      <div class="info-panel">
+        <h2>未修得の必修科目</h2>
+        <ul id="missingRequiredList"></ul>
+      </div>
+
+      <div class="info-panel">
+        <h2>注意</h2>
+        <ul id="warningList"></ul>
+      </div>
+    </section>
+
+    <section class="right-area">
+      <div class="toolbar">
+        <input id="searchInput" type="search" placeholder="科目名で検索">
+
+        <select id="categorySelect">
+          <option value="all">すべての分類</option>
+        </select>
+
+        <select id="subCategorySelect">
+          <option value="all">すべての区分</option>
+        </select>
+
+        <select id="requirementSelect">
+          <option value="all">すべての必選別</option>
+        </select>
+
+        <button id="saveButton" type="button">保存</button>
+        <button id="exportButton" type="button">JSON保存</button>
+        <label class="file-button" for="importInput">JSON読込</label>
+        <input id="importInput" type="file" accept="application/json">
+        <button id="clearButton" type="button" class="danger-button">クリア</button>
+      </div>
+
+      <div class="subject-info">
+        <span id="selectedCount">選択中 0科目</span>
+        <span id="shownCount">表示 0科目</span>
+      </div>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th class="check-column">修得</th>
+              <th>科目名</th>
+              <th>単位</th>
+              <th>分類</th>
+              <th>区分</th>
+              <th>分野</th>
+              <th>必選別</th>
+            </tr>
+          </thead>
+          <tbody id="subjectTableBody"></tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+
+  <script src="calculate.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

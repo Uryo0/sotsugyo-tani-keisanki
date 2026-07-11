@@ -1,0 +1,31 @@
+{
+  "school": "関東学院大学",
+  "faculty": "理工学部",
+  "department": "理工学科",
+  "course": "情報ネット・メディアコース",
+  "studentYear": "2023～2025年度以降入学生用",
+  "totalCredits": 124,
+  "commonCredits": 28,
+  "professionalCredits": 88,
+  "freeCredits": 8,
+  "common": {
+    "liberalHealthCredits": 20,
+    "liberalRequiredCredits": 6,
+    "liberalChoiceRequiredCredits": 2,
+    "liberalHealthOtherCredits": 12,
+    "foreignLanguageCredits": 8,
+    "foreignRequiredCredits": 4,
+    "sameLanguageChoiceCredits": 4
+  },
+  "professional": {
+    "coreBaseCredits": 24,
+    "coreBaseRequiredCredits": 8,
+    "mathChoiceCredits": 4,
+    "coreBaseOtherCredits": 12,
+    "appliedCredits": 64,
+    "appliedRequiredCredits": 38,
+    "programmingChoiceCredits": 6,
+    "courseAppliedChoiceCredits": 18,
+    "departmentAppliedCredits": 2
+  }
+}

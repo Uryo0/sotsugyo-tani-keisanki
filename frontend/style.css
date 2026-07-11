@@ -1,0 +1,303 @@
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  color: #1d2733;
+  background: #f4f6f8;
+  font-family: "Yu Gothic UI", "Meiryo", sans-serif;
+}
+
+.top-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  padding: 22px 28px;
+  color: #ffffff;
+  background: #263442;
+}
+
+.school-name {
+  margin: 0 0 6px;
+  color: #c8d7e4;
+  font-size: 13px;
+}
+
+h1 {
+  margin: 0;
+  font-size: 28px;
+  font-weight: 700;
+  letter-spacing: 0;
+}
+
+h2 {
+  margin: 0 0 12px;
+  font-size: 16px;
+}
+
+.total-box {
+  min-width: 190px;
+  padding: 14px 18px;
+  border: 1px solid #536475;
+  border-radius: 8px;
+  text-align: right;
+  background: #1d2733;
+}
+
+#totalCredits {
+  font-size: 34px;
+  font-weight: 700;
+}
+
+.total-small {
+  color: #d7e2ea;
+  font-size: 16px;
+}
+
+.status-text {
+  margin: 6px 0 0;
+  font-weight: 700;
+}
+
+.status-ok {
+  color: #7ee0a1;
+}
+
+.status-ng {
+  color: #ffb0a8;
+}
+
+.main-layout {
+  display: grid;
+  grid-template-columns: 380px 1fr;
+  gap: 18px;
+  padding: 18px;
+}
+
+.left-area,
+.right-area {
+  min-width: 0;
+}
+
+.requirement-list {
+  display: grid;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+
+.requirement-item,
+.info-panel {
+  border: 1px solid #d9e0e7;
+  border-radius: 8px;
+  background: #ffffff;
+}
+
+.requirement-item {
+  padding: 12px;
+}
+
+.requirement-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+
+.requirement-name {
+  font-weight: 700;
+}
+
+.requirement-number {
+  color: #5e6b77;
+  font-size: 13px;
+  white-space: nowrap;
+}
+
+.progress-bar {
+  width: 100%;
+  height: 8px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: #e7ecf1;
+}
+
+.progress-fill {
+  height: 100%;
+  background: #2f80ed;
+}
+
+.requirement-item.ok .progress-fill {
+  background: #2e9d63;
+}
+
+.requirement-item.ng .progress-fill {
+  background: #d84a3a;
+}
+
+.info-panel {
+  margin-bottom: 14px;
+  padding: 14px;
+}
+
+.info-panel ul {
+  max-height: 220px;
+  margin: 0;
+  padding-left: 20px;
+  overflow: auto;
+}
+
+.info-panel li {
+  margin-bottom: 6px;
+  font-size: 13px;
+}
+
+.toolbar {
+  display: grid;
+  grid-template-columns: 1.8fr 1fr 1fr 1fr auto auto auto auto;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+input,
+select,
+button,
+.file-button {
+  min-height: 38px;
+  border: 1px solid #cfd8e2;
+  border-radius: 6px;
+  font: inherit;
+}
+
+input,
+select {
+  width: 100%;
+  padding: 0 10px;
+  background: #ffffff;
+}
+
+button,
+.file-button {
+  padding: 0 14px;
+  color: #ffffff;
+  background: #2f80ed;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+button:hover,
+.file-button:hover {
+  background: #2468c8;
+}
+
+.danger-button {
+  background: #d84a3a;
+}
+
+.danger-button:hover {
+  background: #b83c30;
+}
+
+#importInput {
+  display: none;
+}
+
+.file-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.subject-info {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 8px;
+  color: #5e6b77;
+  font-size: 13px;
+}
+
+.table-wrap {
+  height: calc(100vh - 190px);
+  overflow: auto;
+  border: 1px solid #d9e0e7;
+  border-radius: 8px;
+  background: #ffffff;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+th,
+td {
+  padding: 10px;
+  border-bottom: 1px solid #edf1f5;
+  text-align: left;
+  vertical-align: middle;
+}
+
+th {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  color: #44515e;
+  background: #f8fafc;
+}
+
+tr:hover {
+  background: #f8fbff;
+}
+
+.check-column {
+  width: 64px;
+  text-align: center;
+}
+
+.subject-check {
+  width: 18px;
+  height: 18px;
+}
+
+.badge {
+  display: inline-block;
+  min-width: 64px;
+  padding: 3px 8px;
+  border-radius: 999px;
+  color: #ffffff;
+  text-align: center;
+  font-size: 12px;
+}
+
+.badge-required {
+  background: #d84a3a;
+}
+
+.badge-choice-required {
+  background: #b05c00;
+}
+
+.badge-register {
+  background: #6b5bd6;
+}
+
+.badge-choice {
+  background: #5e6b77;
+}
+
+@media (max-width: 1050px) {
+  .main-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .toolbar {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .table-wrap {
+    height: 560px;
+  }
+}
