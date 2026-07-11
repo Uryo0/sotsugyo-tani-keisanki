@@ -1,0 +1,14 @@
+node_modules/
+dist/
+build/
+
+# Electronの一時ファイル
+.cache/
+
+# 個人設定や秘密情報
+.env
+.env.local
+
+# OSが作る不要なファイル
+.DS_Store
+Thumbs.db
