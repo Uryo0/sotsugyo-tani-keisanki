@@ -233,22 +233,84 @@ function renderResult() {
 }
 
 // 要件の一覧を表示する
+function findCheck(checks, name) {
+  for (const check of checks) {
+    if (check.name === name) {
+      return check;
+    }
+
+    if (name === "同一外国語" && check.name.startsWith("同一外国語")) {
+      return check;
+    }
+  }
+
+  return null;
+}
+
+// 1つの要件を表示する
+function renderRequirementItem(check, className) {
+  if (check === null) {
+    return "";
+  }
+
+  const okClass = check.ok ? "ok" : "ng";
+  const percent = Math.min(100, Math.round((check.earned / check.required) * 100));
+
+  let html = "";
+  html += "<div class='requirement-item " + okClass + " " + className + "'>";
+  html += "<div class='requirement-head'>";
+  html += "<span class='requirement-name'>" + check.name + "</span>";
+  html += "<span class='requirement-number'>" + check.earned + " / " + check.required + " 単位</span>";
+  html += "</div>";
+  html += "<div class='progress-bar'><div class='progress-fill' style='width: " + percent + "%'></div></div>";
+  html += "</div>";
+
+  return html;
+}
+
+// 小さい要件をまとめて表示する
+function renderChildItems(checks, names) {
+  let html = "";
+
+  for (const name of names) {
+    html += renderRequirementItem(findCheck(checks, name), "requirement-child");
+  }
+
+  return html;
+}
+
+// 要件の一覧を階層で表示する
 function renderRequirementList(checks) {
   const area = document.getElementById("requirementList");
   let html = "";
 
-  for (const check of checks) {
-    const className = check.ok ? "ok" : "ng";
-    const percent = Math.min(100, Math.round((check.earned / check.required) * 100));
+  html += renderRequirementItem(findCheck(checks, "総単位"), "requirement-summary");
 
-    html += "<div class='requirement-item " + className + "'>";
-    html += "<div class='requirement-head'>";
-    html += "<span class='requirement-name'>" + check.name + "</span>";
-    html += "<span class='requirement-number'>" + check.earned + " / " + check.required + " 単位</span>";
-    html += "</div>";
-    html += "<div class='progress-bar'><div class='progress-fill' style='width: " + percent + "%'></div></div>";
-    html += "</div>";
-  }
+  html += "<div class='requirement-section'>";
+  html += renderRequirementItem(findCheck(checks, "共通科目"), "requirement-summary");
+  html += "<div class='requirement-subsection'>";
+  html += renderRequirementItem(findCheck(checks, "教養・保健体育"), "requirement-middle");
+  html += renderChildItems(checks, ["教養必修", "教養選択必修", "教養・保健体育の選択"]);
+  html += "</div>";
+  html += "<div class='requirement-subsection'>";
+  html += renderRequirementItem(findCheck(checks, "外国語"), "requirement-middle");
+  html += renderChildItems(checks, ["必修英語", "同一外国語"]);
+  html += "</div>";
+  html += "</div>";
+
+  html += "<div class='requirement-section'>";
+  html += renderRequirementItem(findCheck(checks, "専門科目"), "requirement-summary");
+  html += "<div class='requirement-subsection'>";
+  html += renderRequirementItem(findCheck(checks, "専門基幹・専門基礎"), "requirement-middle");
+  html += renderChildItems(checks, ["専門基幹・専門基礎の必修", "数学分野の選択必修", "専門基幹・専門基礎の選択"]);
+  html += "</div>";
+  html += "<div class='requirement-subsection'>";
+  html += renderRequirementItem(findCheck(checks, "専門応用"), "requirement-middle");
+  html += renderChildItems(checks, ["専門応用の必修", "プログラミング選択必修", "専門応用の選択", "理工学科専門応用"]);
+  html += "</div>";
+  html += "</div>";
+
+  html += renderRequirementItem(findCheck(checks, "自主選択学修"), "requirement-summary");
 
   area.innerHTML = html;
 }

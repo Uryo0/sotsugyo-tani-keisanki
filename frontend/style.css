@@ -303,3 +303,38 @@ tr:hover {
     height: 560px;
   }
 }
+.requirement-section {
+  display: grid;
+  gap: 10px;
+  padding: 10px;
+  border: 1px solid #cfd8e2;
+  border-radius: 8px;
+  background: #ffffff;
+}
+
+.requirement-subsection {
+  display: grid;
+  gap: 8px;
+  padding-left: 12px;
+  border-left: 4px solid #c8d7e4;
+}
+
+.requirement-summary {
+  border-color: #b9c7d6;
+  background: #ffffff;
+}
+
+.requirement-middle {
+  border-color: #d9e0e7;
+  background: #f8fafc;
+}
+
+.requirement-child {
+  margin-left: 12px;
+  border-color: #e3e9ef;
+  background: #fbfcfd;
+}
+
+.requirement-child .requirement-name {
+  font-weight: 500;
+}
