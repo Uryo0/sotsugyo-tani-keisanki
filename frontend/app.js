@@ -247,6 +247,82 @@ function findCheck(checks, name) {
   return null;
 }
 
+// 画面に出す正式な名前と説明
+const requirementText = {
+  "教養・保健体育": {
+    label: "教養科目・保健体育科目"
+  },
+  "教養必修": {
+    label: "教養科目の必修科目",
+    description: "「キリスト教学」「キリスト教学（技術者としての倫理）」「フレッシャーズセミナ」"
+  },
+  "教養選択必修": {
+    label: "教養科目の選択必修科目",
+    description: "※２単位を超えて修得した場合は、自主選択学修の単位数となる。"
+  },
+  "外国語": {
+    label: "外国語科目"
+  },
+  "必修英語": {
+    label: "外国語科目の必修科目",
+    description: "「総合英語（リーディング）」「総合英語（ライティング）」「総合英語（リスニング）」「総合英語（オーラルコミュニケーション）」"
+  },
+  "同一外国語": {
+    label: "同一外国語科目",
+    description: "英語又はその他の外国語科目の選択必修科目から同一語科目"
+  },
+  "専門基幹・専門基礎": {
+    label: "専門基幹科目・専門基礎科目"
+  },
+  "専門基幹・専門基礎の必修": {
+    label: "専門基幹科目・専門基礎科目の必修科目",
+    description: "「KGU情報基礎演習」「理工学概論」「フレッシャーズプロジェクト」「理工学基礎実験Ⅰ」"
+  },
+  "数学分野の選択必修": {
+    label: "数学分野の選択必修科目",
+    description: "専門基幹科目数学分野の選択必修科目から"
+  },
+  "専門基幹・専門基礎の選択": {
+    label: "専門基幹科目・専門基礎科目の選択科目",
+    description: "専門基幹科目及び専門基礎科目から"
+  },
+  "専門応用": {
+    label: "専門応用科目"
+  },
+  "専門応用の必修": {
+    label: "専門応用科目の必修科目",
+    description: "情報ネット・メディアコース専門応用科目の必修科目"
+  },
+  "プログラミング選択必修": {
+    label: "プログラミング分野の選択必修科目",
+    description: "情報ネット・メディアコース専門応用科目「プログラミング」分野の選択必修科目から"
+  },
+  "専門応用の選択": {
+    label: "専門応用科目の選択科目",
+    description: "情報ネット・メディアコース専門応用科目（登録必須科目含む）から"
+  },
+  "理工学科専門応用": {
+    label: "理工学科専門応用科目",
+    description: "理工学部理工学科専門応用科目から"
+  }
+};
+
+// 画面用の名前と説明を取り出す
+function getRequirementText(checkName) {
+  if (checkName.startsWith("同一外国語")) {
+    return requirementText["同一外国語"];
+  }
+
+  if (requirementText[checkName] !== undefined) {
+    return requirementText[checkName];
+  }
+
+  return {
+    label: checkName,
+    description: ""
+  };
+}
+
 // 1つの要件を表示する
 function renderRequirementItem(check, className) {
   if (check === null) {
@@ -255,13 +331,19 @@ function renderRequirementItem(check, className) {
 
   const okClass = check.ok ? "ok" : "ng";
   const percent = Math.min(100, Math.round((check.earned / check.required) * 100));
+  const text = getRequirementText(check.name);
 
   let html = "";
   html += "<div class='requirement-item " + okClass + " " + className + "'>";
   html += "<div class='requirement-head'>";
-  html += "<span class='requirement-name'>" + check.name + "</span>";
+  html += "<span class='requirement-name'>" + text.label + "</span>";
   html += "<span class='requirement-number'>" + check.earned + " / " + check.required + " 単位</span>";
   html += "</div>";
+
+  if (text.description !== undefined && text.description !== "") {
+    html += "<p class='requirement-description'>" + text.description + "</p>";
+  }
+
   html += "<div class='progress-bar'><div class='progress-fill' style='width: " + percent + "%'></div></div>";
   html += "</div>";
 
@@ -278,7 +360,6 @@ function renderChildItems(checks, names) {
 
   return html;
 }
-
 // 要件の一覧を階層で表示する
 function renderRequirementList(checks) {
   const area = document.getElementById("requirementList");
