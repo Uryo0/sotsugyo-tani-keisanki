@@ -20,12 +20,12 @@
   "professional": {
     "coreBaseCredits": 24,
     "coreBaseRequiredCredits": 8,
-    "mathChoiceCredits": 4,
-    "coreBaseOtherCredits": 12,
+    "mathChoiceCredits": 6,
+    "coreBaseOtherCredits": 10,
     "appliedCredits": 64,
     "appliedRequiredCredits": 38,
-    "programmingChoiceCredits": 6,
+    "programmingChoiceCredits": 2,
     "courseAppliedChoiceCredits": 18,
-    "departmentAppliedCredits": 2
+    "departmentAppliedCredits": 6
   }
 }

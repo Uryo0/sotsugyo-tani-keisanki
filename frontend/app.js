@@ -4,8 +4,10 @@ const path = require("path");
 let subjects = [];
 let requirements = {};
 let selectedIds = [];
+let mainLanguage = "英語";
 
 const saveKey = "sotsugyo-tani-keisanki-selected-ids";
+const languageSaveKey = "sotsugyo-tani-keisanki-main-language";
 
 // JSONファイルを読む
 function readJson(filePath) {
@@ -22,9 +24,14 @@ function loadData() {
   requirements = readJson(path.join(rootPath, "data", "requirements.json"));
 
   const savedText = localStorage.getItem(saveKey);
+  const savedLanguage = localStorage.getItem(languageSaveKey);
 
   if (savedText !== null) {
     selectedIds = JSON.parse(savedText);
+  }
+
+  if (savedLanguage !== null) {
+    mainLanguage = savedLanguage;
   }
 }
 
@@ -33,11 +40,17 @@ function saveSelectedIds() {
   localStorage.setItem(saveKey, JSON.stringify(selectedIds));
 }
 
+// メイン外国語を保存する
+function saveMainLanguage() {
+  localStorage.setItem(languageSaveKey, mainLanguage);
+}
+
 // セレクトボックスを作る
 function setupSelectOptions() {
   setOptions("categorySelect", getUniqueValues("category"));
   setOptions("subCategorySelect", getUniqueValues("sub_category"));
   setOptions("requirementSelect", getUniqueValues("requirement_type"));
+  setupMainLanguageOptions();
 }
 
 // 重複しない値を取り出す
@@ -63,6 +76,39 @@ function setOptions(selectId, values) {
     option.textContent = value;
     select.appendChild(option);
   }
+}
+
+// メイン外国語の選択肢を作る
+function setupMainLanguageOptions() {
+  const select = document.getElementById("mainLanguageSelect");
+  const languages = getLanguageValues();
+
+  for (const language of languages) {
+    const option = document.createElement("option");
+    option.value = language;
+    option.textContent = "メイン外国語: " + language;
+    select.appendChild(option);
+  }
+
+  select.value = mainLanguage;
+}
+
+// 科目データから外国語を取り出す
+function getLanguageValues() {
+  const values = [];
+  const order = ["英語", "ドイツ語", "フランス語", "中国語", "スペイン語", "ロシア語"];
+
+  for (const language of order) {
+    for (const subject of subjects) {
+      if (subject.sub_category === "外国語" && subject.requirement_type === "選択必修") {
+        if (getLanguageName(subject) === language && !values.includes(language)) {
+          values.push(language);
+        }
+      }
+    }
+  }
+
+  return values;
 }
 
 // 表示する科目を絞り込む
@@ -166,7 +212,7 @@ function toggleSubject(subjectId, checked) {
 
 // 計算結果を表示する
 function renderResult() {
-  const result = calculateResult(subjects, selectedIds, requirements);
+  const result = calculateResult(subjects, selectedIds, requirements, mainLanguage);
 
   document.getElementById("totalCredits").textContent = result.totalCredits;
   document.getElementById("selectedCount").textContent = "選択中 " + result.selectedCount + "科目";
@@ -245,6 +291,7 @@ function renderWarnings(missingRegisterSubjects) {
 function exportProgress() {
   const data = {
     selectedIds: selectedIds,
+    mainLanguage: mainLanguage,
     savedAt: new Date().toISOString()
   };
 
@@ -268,10 +315,17 @@ function importProgress(file) {
 
     if (Array.isArray(data.selectedIds)) {
       selectedIds = data.selectedIds;
-      saveSelectedIds();
-      renderSubjects();
-      renderResult();
     }
+
+    if (typeof data.mainLanguage === "string") {
+      mainLanguage = data.mainLanguage;
+      document.getElementById("mainLanguageSelect").value = mainLanguage;
+    }
+
+    saveSelectedIds();
+    saveMainLanguage();
+    renderSubjects();
+    renderResult();
   };
 
   reader.readAsText(file);
@@ -284,8 +338,15 @@ function setupEvents() {
   document.getElementById("subCategorySelect").addEventListener("change", renderSubjects);
   document.getElementById("requirementSelect").addEventListener("change", renderSubjects);
 
+  document.getElementById("mainLanguageSelect").addEventListener("change", function () {
+    mainLanguage = this.value;
+    saveMainLanguage();
+    renderResult();
+  });
+
   document.getElementById("saveButton").addEventListener("click", function () {
     saveSelectedIds();
+    saveMainLanguage();
     alert("保存しました");
   });
 

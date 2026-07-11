@@ -155,8 +155,8 @@ h2 {
 }
 
 .toolbar {
-  display: grid;
-  grid-template-columns: 1.8fr 1fr 1fr 1fr auto auto auto auto;
+  display: flex;
+  flex-wrap: wrap;
   gap: 8px;
   margin-bottom: 10px;
 }
@@ -173,13 +173,19 @@ button,
 
 input,
 select {
-  width: 100%;
+  flex: 1 1 150px;
+  min-width: 140px;
   padding: 0 10px;
   background: #ffffff;
 }
 
+#searchInput {
+  flex-basis: 230px;
+}
+
 button,
 .file-button {
+  flex: 0 0 auto;
   padding: 0 14px;
   color: #ffffff;
   background: #2f80ed;
@@ -291,10 +297,6 @@ tr:hover {
 @media (max-width: 1050px) {
   .main-layout {
     grid-template-columns: 1fr;
-  }
-
-  .toolbar {
-    grid-template-columns: 1fr 1fr;
   }
 
   .table-wrap {
