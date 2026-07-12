@@ -1,12 +1,32 @@
 {
   "name": "sotsugyo-tani-keisanki",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "description": "関東学院大学 理工学部 情報ネット・メディアコースの卒業単位計算機",
   "main": "main.js",
   "scripts": {
-    "start": "electron ."
+    "start": "electron .",
+    "dist": "electron-builder"
   },
   "devDependencies": {
-    "electron": "^43.1.0"
+    "electron": "^43.1.0",
+    "electron-builder": "^26.15.3"
+  },
+  "build": {
+    "appId": "com.uryo.sotsugyo-tani-keisanki",
+    "productName": "卒業単位計算機",
+    "directories": {
+      "output": "release"
+    },
+    "files": [
+      "main.js",
+      "frontend/**/*",
+      "data/**/*",
+      "package.json"
+    ],
+    "win": {
+      "target": [
+        "portable"
+      ]
+    }
   }
 }
