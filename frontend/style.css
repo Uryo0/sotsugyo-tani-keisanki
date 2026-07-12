@@ -438,3 +438,21 @@ tr:hover {
     height: 560px;
   }
 }
+.requirement-inline-control {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 8px;
+}
+
+.requirement-inline-control label {
+  color: #44515e;
+  font-size: 12px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.requirement-inline-control select {
+  flex: 0 1 180px;
+  min-width: 150px;
+}

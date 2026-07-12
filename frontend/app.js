@@ -172,7 +172,6 @@ function setupSelectOptions() {
   setupFilterSelect("categorySelect", getUniqueValues("category"), "すべての分類");
   setupFilterSelect("subCategorySelect", getUniqueValues("sub_category"), "すべての区分");
   setupFilterSelect("requirementSelect", getUniqueValues("requirement_type"), "すべての必選別");
-  setupMainLanguageOptions();
   setupAddSubjectOptions();
 }
 
@@ -290,6 +289,11 @@ function getCreditValues() {
 // メイン外国語の選択肢を作る
 function setupMainLanguageOptions() {
   const select = document.getElementById("mainLanguageSelect");
+
+  if (select === null) {
+    return;
+  }
+
   const currentValue = mainLanguage;
   const languages = getLanguageValues();
 
@@ -298,7 +302,7 @@ function setupMainLanguageOptions() {
   for (const language of languages) {
     const option = document.createElement("option");
     option.value = language;
-    option.textContent = "メイン外国語: " + language;
+    option.textContent = language;
     select.appendChild(option);
   }
 
@@ -308,6 +312,12 @@ function setupMainLanguageOptions() {
     mainLanguage = languages[0];
     select.value = mainLanguage;
   }
+
+  select.addEventListener("change", function () {
+    mainLanguage = this.value;
+    saveMainLanguage();
+    renderResult();
+  });
 }
 
 // 科目データから外国語を取り出す
@@ -739,6 +749,13 @@ function renderRequirementItem(check, className) {
     html += "<p class='requirement-description'>" + text.description + "</p>";
   }
 
+  if (check.name.startsWith("同一外国語")) {
+    html += "<div class='requirement-inline-control'>";
+    html += "<label for='mainLanguageSelect'>メイン外国語</label>";
+    html += "<select id='mainLanguageSelect'></select>";
+    html += "</div>";
+  }
+
   html += "<div class='progress-bar'><div class='progress-fill' style='width: " + percent + "%'></div></div>";
   html += "</div>";
 
@@ -790,6 +807,7 @@ function renderRequirementList(checks) {
   html += renderRequirementItem(findCheck(checks, "自主選択学修"), "requirement-summary");
 
   area.innerHTML = html;
+  setupMainLanguageOptions();
 }
 
 // 未修得の必修科目を表示する
@@ -833,11 +851,6 @@ function setupEvents() {
   document.getElementById("subCategorySelect").addEventListener("change", renderSubjects);
   document.getElementById("requirementSelect").addEventListener("change", renderSubjects);
 
-  document.getElementById("mainLanguageSelect").addEventListener("change", function () {
-    mainLanguage = this.value;
-    saveMainLanguage();
-    renderResult();
-  });
 
   document.getElementById("openAddViewButton").addEventListener("click", function () {
     showView("add");
