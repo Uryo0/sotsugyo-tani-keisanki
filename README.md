@@ -4,7 +4,7 @@
 
 ## 起動方法（利用者向け）
 
-1. GitHub Releasesから `卒業単位計算機 1.0.0.exe` をダウンロードします。
+1. GitHub Releasesから `sotsugyo-tani-keisanki-v1.0.0.exe` をダウンロードします。
 2. ダウンロードした `.exe` をダブルクリックします。
 3. Windowsの警告が出た場合は、内容を確認して実行します。
 
