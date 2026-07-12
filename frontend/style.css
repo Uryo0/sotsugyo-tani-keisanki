@@ -89,10 +89,16 @@ h2 {
   min-width: 0;
 }
 
+.left-area,
 .right-area {
   display: flex;
   flex-direction: column;
   align-self: stretch;
+}
+
+.left-area .info-panel:last-child {
+  flex: 1 1 auto;
+  margin-bottom: 0;
 }
 
 .screen-panel {
