@@ -7,6 +7,7 @@ let subjects = [];
 let requirements = {};
 let selectedIds = [];
 let mainLanguage = "英語";
+let previousPercents = {};
 
 const saveKey = "sotsugyo-tani-keisanki-selected-ids";
 const languageSaveKey = "sotsugyo-tani-keisanki-main-language";
@@ -728,6 +729,22 @@ function getRequirementText(checkName) {
   };
 }
 
+// ゲージを前の幅から今の幅へ動かす
+function moveProgressBars() {
+  const bars = document.querySelectorAll(".progress-fill");
+
+  for (const bar of bars) {
+    const name = bar.dataset.name;
+    const targetPercent = Number(bar.dataset.percent);
+
+    requestAnimationFrame(function () {
+      bar.style.width = targetPercent + "%";
+    });
+
+    previousPercents[name] = targetPercent;
+  }
+}
+
 // 1つの要件を表示する
 function renderRequirementItem(check, className) {
   if (check === null) {
@@ -736,6 +753,7 @@ function renderRequirementItem(check, className) {
 
   const okClass = check.ok ? "ok" : "ng";
   const percent = Math.min(100, Math.round((check.earned / check.required) * 100));
+  const beforePercent = previousPercents[check.name] === undefined ? 0 : previousPercents[check.name];
   const text = getRequirementText(check.name);
 
   let html = "";
@@ -756,7 +774,7 @@ function renderRequirementItem(check, className) {
     html += "</div>";
   }
 
-  html += "<div class='progress-bar'><div class='progress-fill' style='width: " + percent + "%'></div></div>";
+  html += "<div class='progress-bar'><div class='progress-fill' data-name='" + escapeHtml(check.name) + "' data-percent='" + percent + "' style='width: " + beforePercent + "%'></div></div>";
   html += "</div>";
 
   return html;
@@ -808,6 +826,7 @@ function renderRequirementList(checks) {
 
   area.innerHTML = html;
   setupMainLanguageOptions();
+  moveProgressBars();
 }
 
 // 未修得の必修科目を表示する

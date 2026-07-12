@@ -191,7 +191,9 @@ h2 {
 
 .progress-fill {
   height: 100%;
+  width: 0;
   background: #2f80ed;
+  transition: width 0.55s ease, background-color 0.2s ease;
 }
 
 .requirement-item.ok .progress-fill {
