@@ -89,6 +89,12 @@ h2 {
   min-width: 0;
 }
 
+.right-area {
+  display: flex;
+  flex-direction: column;
+  align-self: stretch;
+}
+
 .screen-panel {
   max-width: 1180px;
   margin: 0 auto;
@@ -273,8 +279,9 @@ button:hover,
 }
 
 .table-wrap {
-  height: calc(100vh - 190px);
-  min-height: 360px;
+  flex: 1 1 0;
+  height: auto;
+  min-height: calc(100vh - 190px);
   overflow: auto;
   border: 1px solid #d9e0e7;
   border-radius: 8px;
@@ -435,7 +442,7 @@ tr:hover {
   }
 
   .table-wrap {
-    height: 560px;
+    min-height: 560px;
   }
 }
 .requirement-inline-control {
