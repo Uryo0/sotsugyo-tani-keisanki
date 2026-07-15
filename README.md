@@ -4,11 +4,11 @@
 
 ## 起動方法（利用者向け）
 
-1. GitHub Releasesから `sotsugyo-tani-keisanki-v1.0.1.exe` をダウンロードします。
+1. GitHub Releasesから `sotsugyo-tani-keisanki-v1.1.0.exe` をダウンロードします。
 2. ダウンロードした `.exe` をダブルクリックします。
 3. Windowsの警告が出た場合は、内容を確認して実行します。
 
-Releaseページ: https://github.com/Uryo0/sotsugyo-tani-keisanki/releases/tag/v1.0.1
+Releaseページ: https://github.com/Uryo0/sotsugyo-tani-keisanki/releases/tag/v1.1.0
 
 ## 開発者向けの起動方法
 
@@ -72,4 +72,6 @@ npm run dist
 ## 科目データについて
 
 専門応用科目には `course` を入れています。`field` は「プログラミング」「メディア工学」など、履修要項の分野を書きます。
-他コースの専門応用科目を追加する時は、他コースで必修や登録必須でも、情報ネット・メディアコース用の計算では `requirement_type` を「選択」にします。
+他コースの専門応用科目は、他コースで必修や登録必須でも、情報ネット・メディアコース用の計算では `requirement_type` を「選択」にしています。
+情報ネット・メディアコースと同じ科目名の他コース科目は追加せず、情報ネット・メディアコースの科目として扱います。
+他コースの卒業研究関連科目、実験・実習・実技の科目、他学部開講科目は、理工学科専門応用科目の単位には入れず、自主選択学修の単位として扱います。

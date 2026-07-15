@@ -88,6 +88,7 @@ function getMainLanguageChoiceCredits(subjects, mainLanguage) {
 }
 
 const mainCourseName = "情報ネット・メディアコース";
+const otherFacultyAppliedNames = ["リサイクルデザイン論", "土木行政実務研修"];
 
 // 情報ネット・メディアコースの専門応用科目か調べる
 function isMainCourseApplied(subject) {
@@ -96,6 +97,26 @@ function isMainCourseApplied(subject) {
   }
 
   return subject.course === mainCourseName || subject.course === null || subject.course === undefined || subject.course === "";
+}
+
+// 他コース科目で理工学科専門応用に入れない科目か調べる
+function isExcludedDepartmentApplied(subject) {
+  if (subject.sub_category !== "専門応用" || isMainCourseApplied(subject)) {
+    return false;
+  }
+
+  const classType = subject.class_type || "";
+
+  return subject.field === "卒業研究関連" ||
+    classType.includes("実験") ||
+    classType.includes("実習") ||
+    classType.includes("実技") ||
+    otherFacultyAppliedNames.includes(subject.name);
+}
+
+// 理工学科専門応用として使える科目か調べる
+function isDepartmentApplied(subject) {
+  return subject.sub_category === "専門応用" && !isExcludedDepartmentApplied(subject);
 }
 
 // 卒業要件を計算する
@@ -160,15 +181,15 @@ function calculateResult(subjects, selectedIds, requirements, mainLanguage) {
   const mainCourseAppliedCredits = sumCreditsBy(selectedSubjects, function (subject) {
     return isMainCourseApplied(subject);
   });
-  const appliedCredits = sumCreditsBy(selectedSubjects, function (subject) {
-    return subject.sub_category === "専門応用";
+  const departmentAppliedCredits = sumCreditsBy(selectedSubjects, function (subject) {
+    return isDepartmentApplied(subject);
   });
 
   const usedAppliedRequired = limitCredits(appliedRequiredCredits, requirements.professional.appliedRequiredCredits);
   const usedProgrammingChoice = limitCredits(programmingChoiceCredits, requirements.professional.programmingChoiceCredits);
   const mainCourseAppliedRestCredits = Math.max(0, mainCourseAppliedCredits - usedAppliedRequired - usedProgrammingChoice);
   const usedCourseAppliedChoice = limitCredits(mainCourseAppliedRestCredits, requirements.professional.courseAppliedChoiceCredits);
-  const departmentAppliedCandidate = Math.max(0, appliedCredits - usedAppliedRequired - usedProgrammingChoice - usedCourseAppliedChoice);
+  const departmentAppliedCandidate = Math.max(0, departmentAppliedCredits - usedAppliedRequired - usedProgrammingChoice - usedCourseAppliedChoice);
   const usedDepartmentApplied = limitCredits(departmentAppliedCandidate, requirements.professional.departmentAppliedCredits);
   const usedAppliedCredits = usedAppliedRequired + usedProgrammingChoice + usedCourseAppliedChoice + usedDepartmentApplied;
 
