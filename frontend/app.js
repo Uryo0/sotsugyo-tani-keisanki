@@ -9,9 +9,12 @@ let selectedIds = [];
 let mainLanguage = "英語";
 let previousPercents = {};
 
+const dataVersion = 1;
+const stateSaveKey = "sotsugyo-tani-keisanki-state";
 const saveKey = "sotsugyo-tani-keisanki-selected-ids";
 const languageSaveKey = "sotsugyo-tani-keisanki-main-language";
 const customSubjectsKey = "sotsugyo-tani-keisanki-custom-subjects";
+let addCounter = 0;
 
 // JSONファイルを読む
 function readJson(filePath) {
@@ -34,9 +37,58 @@ function escapeHtml(value) {
     .replace(/'/g, "&#039;");
 }
 
-// add001 のようなIDを作る
-function makeAddId(number) {
-  return "add" + String(number).padStart(3, "0");
+// add001 の番号部分を取り出す
+function getAddNumber(id) {
+  const match = String(id).match(/^add(\d+)$/);
+
+  if (match === null) {
+    return 0;
+  }
+
+  return Number(match[1]);
+}
+
+// 追加科目IDの一番大きい番号を調べる
+function getMaxAddNumber() {
+  let maxNumber = 0;
+
+  for (const subject of customSubjects) {
+    maxNumber = Math.max(maxNumber, getAddNumber(subject.id));
+  }
+
+  return maxNumber;
+}
+
+// 同じIDがすでにあるか調べる
+function subjectIdExists(id) {
+  for (const subject of baseSubjects.concat(customSubjects)) {
+    if (subject.id === id) {
+      return true;
+    }
+  }
+
+  return false;
+}
+
+// add001 のようなIDを作る。削除しても番号は戻さない。
+function makeAddId() {
+  let id = "";
+
+  do {
+    addCounter++;
+    id = "add" + String(addCounter).padStart(3, "0");
+  } while (subjectIdExists(id));
+
+  return id;
+}
+
+// JSONを安全に読み込む
+function parseSavedJson(text, defaultValue) {
+  try {
+    return JSON.parse(text);
+  } catch (error) {
+    return defaultValue;
+  }
 }
 
 // 最初にデータを読む
@@ -46,12 +98,40 @@ function loadData() {
   baseSubjects = readJson(path.join(rootPath, "data", "subjects.json"));
   requirements = readJson(path.join(rootPath, "data", "requirements.json"));
 
+  loadState();
+  rebuildSubjects();
+  cleanSelectedIds();
+  saveAllData();
+}
+
+// 保存済みデータを読む
+function loadState() {
+  const savedStateText = localStorage.getItem(stateSaveKey);
+
+  if (savedStateText !== null) {
+    const state = parseSavedJson(savedStateText, null);
+
+    if (state !== null) {
+      applyState(state);
+      return;
+    }
+  }
+
+  loadOldState();
+}
+
+// 古い保存形式から読む
+function loadOldState() {
   const savedText = localStorage.getItem(saveKey);
   const savedLanguage = localStorage.getItem(languageSaveKey);
   const savedCustomSubjects = localStorage.getItem(customSubjectsKey);
 
   if (savedText !== null) {
-    selectedIds = JSON.parse(savedText);
+    const oldSelectedIds = parseSavedJson(savedText, []);
+
+    if (Array.isArray(oldSelectedIds)) {
+      selectedIds = oldSelectedIds;
+    }
   }
 
   if (savedLanguage !== null) {
@@ -59,13 +139,31 @@ function loadData() {
   }
 
   if (savedCustomSubjects !== null) {
-    customSubjects = JSON.parse(savedCustomSubjects);
+    const oldCustomSubjects = parseSavedJson(savedCustomSubjects, []);
+
+    if (Array.isArray(oldCustomSubjects)) {
+      customSubjects = oldCustomSubjects;
+    }
   }
 
-  renumberCustomSubjects();
-  rebuildSubjects();
-  cleanSelectedIds();
-  saveAllData();
+  addCounter = getMaxAddNumber();
+}
+
+// 保存済みデータを画面用の変数に入れる
+function applyState(state) {
+  if (Array.isArray(state.selectedIds)) {
+    selectedIds = state.selectedIds;
+  }
+
+  if (typeof state.mainLanguage === "string") {
+    mainLanguage = state.mainLanguage;
+  }
+
+  if (Array.isArray(state.customSubjects)) {
+    customSubjects = state.customSubjects;
+  }
+
+  addCounter = Math.max(Number(state.addCounter) || 0, getMaxAddNumber());
 }
 
 // 元の科目と追加科目を合わせる
@@ -73,26 +171,40 @@ function rebuildSubjects() {
   subjects = baseSubjects.concat(customSubjects);
 }
 
+// 保存するデータを1つにまとめる
+function makeState() {
+  return {
+    dataVersion: dataVersion,
+    selectedIds: selectedIds,
+    mainLanguage: mainLanguage,
+    customSubjects: customSubjects,
+    addCounter: addCounter
+  };
+}
+
+// 保存する
+function saveState() {
+  localStorage.setItem(stateSaveKey, JSON.stringify(makeState()));
+}
+
 // 選択状態を保存する
 function saveSelectedIds() {
-  localStorage.setItem(saveKey, JSON.stringify(selectedIds));
+  saveState();
 }
 
 // メイン外国語を保存する
 function saveMainLanguage() {
-  localStorage.setItem(languageSaveKey, mainLanguage);
+  saveState();
 }
 
 // 追加科目を保存する
 function saveCustomSubjects() {
-  localStorage.setItem(customSubjectsKey, JSON.stringify(customSubjects));
+  saveState();
 }
 
 // 必要なデータをまとめて保存する
 function saveAllData() {
-  saveSelectedIds();
-  saveMainLanguage();
-  saveCustomSubjects();
+  saveState();
 }
 
 // 存在しないIDを選択状態から外す
@@ -113,24 +225,6 @@ function cleanSelectedIds() {
   selectedIds = newSelectedIds;
 }
 
-// 追加科目のIDを add001 から順に振り直す
-function renumberCustomSubjects() {
-  const idMap = {};
-
-  for (let i = 0; i < customSubjects.length; i++) {
-    const oldId = customSubjects[i].id;
-    const newId = makeAddId(i + 1);
-
-    idMap[oldId] = newId;
-    customSubjects[i].id = newId;
-  }
-
-  for (let i = 0; i < selectedIds.length; i++) {
-    if (idMap[selectedIds[i]] !== undefined) {
-      selectedIds[i] = idMap[selectedIds[i]];
-    }
-  }
-}
 
 // 画面を切り替える
 function showView(viewName) {
@@ -522,7 +616,7 @@ function addSubject() {
   }
 
   const subject = {
-    id: makeAddId(customSubjects.length + 1),
+    id: makeAddId(),
     name: name,
     credits: credits,
     requirement_type: requirementType,
@@ -535,7 +629,7 @@ function addSubject() {
 
   customSubjects.push(subject);
   rebuildSubjects();
-  saveCustomSubjects();
+  saveAllData();
   clearAddForm();
   setupSelectOptions();
   renderSubjects();
@@ -566,26 +660,13 @@ function deleteSelectedAddedSubjects() {
     return;
   }
 
-  const idMap = {};
-  const newCustomSubjects = [];
-  let nextNumber = 1;
+  customSubjects = customSubjects.filter(function (subject) {
+    return !deleteIds.includes(subject.id);
+  });
 
-  for (const subject of customSubjects) {
-    if (deleteIds.includes(subject.id)) {
-      continue;
-    }
-
-    const oldId = subject.id;
-    const newSubject = Object.assign({}, subject);
-
-    newSubject.id = makeAddId(nextNumber);
-    idMap[oldId] = newSubject.id;
-    newCustomSubjects.push(newSubject);
-    nextNumber++;
-  }
-
-  customSubjects = newCustomSubjects;
-  selectedIds = updateSelectedIdsAfterDelete(deleteIds, idMap);
+  selectedIds = selectedIds.filter(function (id) {
+    return !deleteIds.includes(id);
+  });
 
   rebuildSubjects();
   cleanSelectedIds();
@@ -597,24 +678,6 @@ function deleteSelectedAddedSubjects() {
   setMessage("deleteMessage", "追加科目を削除しました");
 }
 
-// 削除後に選択中IDも直す
-function updateSelectedIdsAfterDelete(deleteIds, idMap) {
-  const newSelectedIds = [];
-
-  for (const id of selectedIds) {
-    if (deleteIds.includes(id)) {
-      continue;
-    }
-
-    if (idMap[id] !== undefined) {
-      newSelectedIds.push(idMap[id]);
-    } else {
-      newSelectedIds.push(id);
-    }
-  }
-
-  return newSelectedIds;
-}
 
 // 計算結果を表示する
 function renderResult() {

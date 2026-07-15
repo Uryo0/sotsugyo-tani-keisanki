@@ -4,11 +4,11 @@
 
 ## 起動方法（利用者向け）
 
-1. GitHub Releasesから `sotsugyo-tani-keisanki-v1.0.0.exe` をダウンロードします。
+1. GitHub Releasesから `sotsugyo-tani-keisanki-v1.0.1.exe` をダウンロードします。
 2. ダウンロードした `.exe` をダブルクリックします。
 3. Windowsの警告が出た場合は、内容を確認して実行します。
 
-Releaseページ: https://github.com/Uryo0/sotsugyo-tani-keisanki/releases/tag/v1.0.0
+Releaseページ: https://github.com/Uryo0/sotsugyo-tani-keisanki/releases/tag/v1.0.1
 
 ## 開発者向けの起動方法
 
@@ -39,8 +39,8 @@ npm run dist
 ## 追加科目のID
 
 アプリ画面から追加した科目には、追加した順に `add001`、`add002` のようなIDを付けます。
-追加科目を削除した場合は、残った追加科目のIDを `add001` から順番に付け直します。
-例えば、`add001` と `add002` がある状態で `add001` を削除すると、`add002` は `add001` になります。
+一度付けたIDは、追加科目を削除しても変更しません。
+例えば、`add001` と `add002` がある状態で `add001` を削除しても、`add002` は `add002` のままです。次に追加する科目は `add003` になります。
 
 ## 外国語科目の計算
 
