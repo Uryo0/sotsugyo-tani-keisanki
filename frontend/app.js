@@ -301,6 +301,7 @@ function setupAddSubjectOptions() {
   setupFieldSelect();
   setupPlainSelect("addRequirementSelect", getUniqueValues("requirement_type"));
   setupPlainSelect("addClassTypeSelect", getUniqueValues("class_type"));
+  setupCountsAsSelect();
 }
 
 // 普通のセレクトボックスを作る
@@ -360,6 +361,28 @@ function setupFieldSelect() {
   }
 
   updateNewFieldInput();
+}
+
+// 計算先のセレクトボックスを作る
+function setupCountsAsSelect() {
+  const select = document.getElementById("addCountsAsSelect");
+  const currentValue = select.value;
+
+  select.innerHTML = "";
+
+  const normalOption = document.createElement("option");
+  normalOption.value = "";
+  normalOption.textContent = "通常計算";
+  select.appendChild(normalOption);
+
+  const freeOption = document.createElement("option");
+  freeOption.value = "自主選択学修";
+  freeOption.textContent = "自主選択学修へ直接入れる";
+  select.appendChild(freeOption);
+
+  if (hasOption(select, currentValue)) {
+    select.value = currentValue;
+  }
 }
 
 // セレクトボックスに項目を入れる
@@ -529,6 +552,7 @@ function renderSubjects() {
     html += "<td>" + escapeHtml(subject.course) + "</td>";
     html += "<td>" + escapeHtml(subject.field) + "</td>";
     html += "<td>" + getRequirementBadge(subject.requirement_type) + "</td>";
+    html += "<td>" + escapeHtml(subject.counts_as) + "</td>";
     html += "<td>" + escapeHtml(subject.class_type) + "</td>";
     html += "<td>" + escapeHtml(subject.old_name) + "</td>";
     html += "</tr>";
@@ -553,7 +577,7 @@ function renderDeleteSubjects() {
   let html = "";
 
   if (customSubjects.length === 0) {
-    tbody.innerHTML = "<tr><td colspan='10'>追加した科目はありません</td></tr>";
+    tbody.innerHTML = "<tr><td colspan='11'>追加した科目はありません</td></tr>";
     return;
   }
 
@@ -567,6 +591,7 @@ function renderDeleteSubjects() {
     html += "<td>" + escapeHtml(subject.course) + "</td>";
     html += "<td>" + escapeHtml(subject.field) + "</td>";
     html += "<td>" + getRequirementBadge(subject.requirement_type) + "</td>";
+    html += "<td>" + escapeHtml(subject.counts_as) + "</td>";
     html += "<td>" + escapeHtml(subject.class_type) + "</td>";
     html += "<td>" + escapeHtml(subject.old_name) + "</td>";
     html += "</tr>";
@@ -637,6 +662,31 @@ function updateNewFieldInput() {
   }
 }
 
+// 科目名を比べやすい形にする
+function normalizeSubjectName(name) {
+  return String(name || "").trim().toLowerCase();
+}
+
+// 同じ科目名や旧科目名があるか調べる
+function subjectNameExists(name) {
+  const targetName = normalizeSubjectName(name);
+
+  if (targetName === "") {
+    return false;
+  }
+
+  for (const subject of subjects) {
+    const subjectName = normalizeSubjectName(subject.name);
+    const oldSubjectName = normalizeSubjectName(subject.old_name);
+
+    if (subjectName === targetName || oldSubjectName === targetName) {
+      return true;
+    }
+  }
+
+  return false;
+}
+
 // 科目を追加する
 function addSubject() {
   const name = document.getElementById("addNameInput").value.trim();
@@ -646,11 +696,27 @@ function addSubject() {
   const requirementType = document.getElementById("addRequirementSelect").value;
   const classType = document.getElementById("addClassTypeSelect").value;
   const oldNameInput = document.getElementById("addOldNameInput").value.trim();
+  const countsAs = document.getElementById("addCountsAsSelect").value;
   let course = document.getElementById("addCourseSelect").value;
   let field = document.getElementById("addFieldSelect").value;
 
   if (name === "") {
     setMessage("addMessage", "科目名を入力してください");
+    return;
+  }
+
+  if (subjectNameExists(name)) {
+    setMessage("addMessage", "同じ科目名または旧科目名の科目があります");
+    return;
+  }
+
+  if (oldNameInput !== "" && normalizeSubjectName(oldNameInput) === normalizeSubjectName(name)) {
+    setMessage("addMessage", "科目名と旧科目名は別の名前にしてください");
+    return;
+  }
+
+  if (oldNameInput !== "" && subjectNameExists(oldNameInput)) {
+    setMessage("addMessage", "同じ科目名または旧科目名の科目があります");
     return;
   }
 
@@ -682,7 +748,8 @@ function addSubject() {
     course: course === "" ? null : course,
     field: field,
     class_type: classType,
-    old_name: oldNameInput === "" ? null : oldNameInput
+    old_name: oldNameInput === "" ? null : oldNameInput,
+    counts_as: countsAs === "" ? null : countsAs
   };
 
   customSubjects.push(subject);
@@ -701,6 +768,7 @@ function clearAddForm() {
   document.getElementById("addOldNameInput").value = "";
   document.getElementById("addNewCourseInput").value = "";
   document.getElementById("addNewFieldInput").value = "";
+  document.getElementById("addCountsAsSelect").value = "";
 }
 
 // 選択した追加科目を削除する

@@ -4,11 +4,11 @@
 
 ## 起動方法（利用者向け）
 
-1. GitHub Releasesから `sotsugyo-tani-keisanki-v1.1.0.exe` をダウンロードします。
+1. GitHub Releasesから `sotsugyo-tani-keisanki-v1.1.1.exe` をダウンロードします。
 2. ダウンロードした `.exe` をダブルクリックします。
 3. Windowsの警告が出た場合は、内容を確認して実行します。
 
-Releaseページ: https://github.com/Uryo0/sotsugyo-tani-keisanki/releases/tag/v1.1.0
+Releaseページ: https://github.com/Uryo0/sotsugyo-tani-keisanki/releases/tag/v1.1.1
 
 ## 開発者向けの起動方法
 
@@ -34,6 +34,7 @@ npm run dist
 - 科目名と旧科目名で検索する
 - アプリ画面から科目を追加する
 - 追加した科目だけを削除する
+- 自主選択学修に直接入る科目を計算する
 - 選択状態と追加科目を保存する
 
 ## 追加科目のID
@@ -75,3 +76,5 @@ npm run dist
 他コースの専門応用科目は、他コースで必修や登録必須でも、情報ネット・メディアコース用の計算では `requirement_type` を「選択」にしています。
 情報ネット・メディアコースと同じ科目名の他コース科目は追加せず、情報ネット・メディアコースの科目として扱います。
 他コースの卒業研究関連科目、実験・実習・実技の科目、他学部開講科目は、理工学科専門応用科目の単位には入れず、自主選択学修の単位として扱います。
+
+自主選択学修として直接扱う科目には、`counts_as` に「自主選択学修」を入れています。日本語、海外語学演習、数学基礎Ⅰ・Ⅱなどが対象です。

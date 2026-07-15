@@ -119,20 +119,28 @@ function isDepartmentApplied(subject) {
   return subject.sub_category === "専門応用" && !isExcludedDepartmentApplied(subject);
 }
 
+// 自主選択学修に直接入れる科目か調べる
+function isDirectFreeSubject(subject) {
+  return subject.counts_as === "自主選択学修";
+}
+
 // 卒業要件を計算する
 function calculateResult(subjects, selectedIds, requirements, mainLanguage) {
   const selectedSubjects = getSelectedSubjects(subjects, selectedIds);
+  const normalSubjects = selectedSubjects.filter(function (subject) {
+    return !isDirectFreeSubject(subject);
+  });
   const language = mainLanguage || "英語";
 
   const totalCredits = sumCredits(selectedSubjects);
 
-  const liberalRequiredCredits = sumCreditsBy(selectedSubjects, function (subject) {
+  const liberalRequiredCredits = sumCreditsBy(normalSubjects, function (subject) {
     return subject.sub_category === "教養" && subject.requirement_type === "必修";
   });
-  const liberalChoiceRequiredCredits = sumCreditsBy(selectedSubjects, function (subject) {
+  const liberalChoiceRequiredCredits = sumCreditsBy(normalSubjects, function (subject) {
     return subject.sub_category === "教養" && subject.requirement_type === "選択必修";
   });
-  const liberalHealthOtherCredits = sumCreditsBy(selectedSubjects, function (subject) {
+  const liberalHealthOtherCredits = sumCreditsBy(normalSubjects, function (subject) {
     const isLiberalChoice = subject.sub_category === "教養" && subject.requirement_type === "選択";
     const isLiberalRegister = subject.sub_category === "教養" && subject.requirement_type === "登録必須";
     const isHealth = subject.sub_category === "保健体育";
@@ -145,10 +153,10 @@ function calculateResult(subjects, selectedIds, requirements, mainLanguage) {
   const usedLiberalHealthOther = limitCredits(liberalHealthOtherCredits, requirements.common.liberalHealthOtherCredits);
   const usedLiberalHealthCredits = usedLiberalRequired + usedLiberalChoice + usedLiberalHealthOther;
 
-  const foreignRequiredCredits = sumCreditsBy(selectedSubjects, function (subject) {
+  const foreignRequiredCredits = sumCreditsBy(normalSubjects, function (subject) {
     return subject.sub_category === "外国語" && subject.requirement_type === "必修";
   });
-  const mainLanguageChoiceCredits = getMainLanguageChoiceCredits(selectedSubjects, language);
+  const mainLanguageChoiceCredits = getMainLanguageChoiceCredits(normalSubjects, language);
 
   const usedForeignRequired = limitCredits(foreignRequiredCredits, requirements.common.foreignRequiredCredits);
   const usedMainLanguageChoice = limitCredits(mainLanguageChoiceCredits, requirements.common.sameLanguageChoiceCredits);
@@ -156,13 +164,13 @@ function calculateResult(subjects, selectedIds, requirements, mainLanguage) {
 
   const usedCommonCredits = usedLiberalHealthCredits + usedForeignLanguageCredits;
 
-  const coreBaseRequiredCredits = sumCreditsBy(selectedSubjects, function (subject) {
+  const coreBaseRequiredCredits = sumCreditsBy(normalSubjects, function (subject) {
     return (subject.sub_category === "専門基幹" || subject.sub_category === "専門基礎") && subject.requirement_type === "必修";
   });
-  const mathChoiceCredits = sumCreditsBy(selectedSubjects, function (subject) {
+  const mathChoiceCredits = sumCreditsBy(normalSubjects, function (subject) {
     return subject.sub_category === "専門基幹" && subject.field === "数学" && subject.requirement_type === "選択必修";
   });
-  const coreBaseCredits = sumCreditsBy(selectedSubjects, function (subject) {
+  const coreBaseCredits = sumCreditsBy(normalSubjects, function (subject) {
     return subject.sub_category === "専門基幹" || subject.sub_category === "専門基礎";
   });
 
@@ -172,16 +180,16 @@ function calculateResult(subjects, selectedIds, requirements, mainLanguage) {
   const usedCoreBaseOther = limitCredits(coreBaseRestCredits, requirements.professional.coreBaseOtherCredits);
   const usedCoreBaseCredits = usedCoreBaseRequired + usedMathChoice + usedCoreBaseOther;
 
-  const appliedRequiredCredits = sumCreditsBy(selectedSubjects, function (subject) {
+  const appliedRequiredCredits = sumCreditsBy(normalSubjects, function (subject) {
     return isMainCourseApplied(subject) && subject.requirement_type === "必修";
   });
-  const programmingChoiceCredits = sumCreditsBy(selectedSubjects, function (subject) {
+  const programmingChoiceCredits = sumCreditsBy(normalSubjects, function (subject) {
     return isMainCourseApplied(subject) && subject.field === "プログラミング" && subject.requirement_type === "選択必修";
   });
-  const mainCourseAppliedCredits = sumCreditsBy(selectedSubjects, function (subject) {
+  const mainCourseAppliedCredits = sumCreditsBy(normalSubjects, function (subject) {
     return isMainCourseApplied(subject);
   });
-  const departmentAppliedCredits = sumCreditsBy(selectedSubjects, function (subject) {
+  const departmentAppliedCredits = sumCreditsBy(normalSubjects, function (subject) {
     return isDepartmentApplied(subject);
   });
 
@@ -202,11 +210,11 @@ function calculateResult(subjects, selectedIds, requirements, mainLanguage) {
   const missingRegisterSubjects = [];
 
   for (const subject of subjects) {
-    if (subject.requirement_type === "必修" && !selectedIds.includes(subject.id)) {
+    if (!isDirectFreeSubject(subject) && subject.requirement_type === "必修" && !selectedIds.includes(subject.id)) {
       missingRequiredSubjects.push(subject);
     }
 
-    if (subject.requirement_type === "登録必須" && !selectedIds.includes(subject.id)) {
+    if (!isDirectFreeSubject(subject) && subject.requirement_type === "登録必須" && !selectedIds.includes(subject.id)) {
       missingRegisterSubjects.push(subject);
     }
   }
