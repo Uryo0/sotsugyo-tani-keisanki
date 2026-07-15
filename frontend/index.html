@@ -46,6 +46,10 @@
           <option value="all">すべての区分</option>
         </select>
 
+        <select id="courseSelect">
+          <option value="all">すべてのコース</option>
+        </select>
+
         <select id="requirementSelect">
           <option value="all">すべての必選別</option>
         </select>
@@ -71,6 +75,7 @@
               <th>単位</th>
               <th>分類</th>
               <th>区分</th>
+              <th>コース</th>
               <th>分野</th>
               <th>必選別</th>
               <th>授業形態</th>
@@ -111,6 +116,16 @@
         <label>
           <span>区分</span>
           <select id="addSubCategorySelect"></select>
+        </label>
+
+        <label>
+          <span>コース</span>
+          <select id="addCourseSelect"></select>
+        </label>
+
+        <label id="newCourseLabel" class="hidden-field">
+          <span>新しいコース</span>
+          <input id="addNewCourseInput" type="text">
         </label>
 
         <label>
@@ -161,6 +176,7 @@
               <th>単位</th>
               <th>分類</th>
               <th>区分</th>
+              <th>コース</th>
               <th>分野</th>
               <th>必選別</th>
               <th>授業形態</th>

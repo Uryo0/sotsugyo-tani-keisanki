@@ -266,6 +266,7 @@ function setMessage(id, text) {
 function setupSelectOptions() {
   setupFilterSelect("categorySelect", getUniqueValues("category"), "すべての分類");
   setupFilterSelect("subCategorySelect", getUniqueValues("sub_category"), "すべての区分");
+  setupFilterSelect("courseSelect", getUniqueValues("course"), "すべてのコース");
   setupFilterSelect("requirementSelect", getUniqueValues("requirement_type"), "すべての必選別");
   setupAddSubjectOptions();
 }
@@ -296,6 +297,7 @@ function setupAddSubjectOptions() {
   setupPlainSelect("addCreditsSelect", getCreditValues());
   setupPlainSelect("addCategorySelect", getUniqueValues("category"));
   setupPlainSelect("addSubCategorySelect", getUniqueValues("sub_category"));
+  setupCourseSelect();
   setupFieldSelect();
   setupPlainSelect("addRequirementSelect", getUniqueValues("requirement_type"));
   setupPlainSelect("addClassTypeSelect", getUniqueValues("class_type"));
@@ -312,6 +314,32 @@ function setupPlainSelect(selectId, values) {
   if (hasOption(select, currentValue)) {
     select.value = currentValue;
   }
+}
+
+// コースのセレクトボックスを作る
+function setupCourseSelect() {
+  const select = document.getElementById("addCourseSelect");
+  const currentValue = select.value;
+
+  select.innerHTML = "";
+
+  const noneOption = document.createElement("option");
+  noneOption.value = "";
+  noneOption.textContent = "なし";
+  select.appendChild(noneOption);
+
+  addOptions(select, getUniqueValues("course"));
+
+  const newOption = document.createElement("option");
+  newOption.value = "__new__";
+  newOption.textContent = "新しく追加";
+  select.appendChild(newOption);
+
+  if (hasOption(select, currentValue)) {
+    select.value = currentValue;
+  }
+
+  updateNewCourseInput();
 }
 
 // 分野のセレクトボックスを作る
@@ -448,6 +476,7 @@ function getFilteredSubjects() {
   const searchText = document.getElementById("searchInput").value.trim().toLowerCase();
   const category = document.getElementById("categorySelect").value;
   const subCategory = document.getElementById("subCategorySelect").value;
+  const course = document.getElementById("courseSelect").value;
   const requirementType = document.getElementById("requirementSelect").value;
   const filteredSubjects = [];
 
@@ -464,6 +493,10 @@ function getFilteredSubjects() {
     }
 
     if (subCategory !== "all" && subject.sub_category !== subCategory) {
+      continue;
+    }
+
+    if (course !== "all" && subject.course !== course) {
       continue;
     }
 
@@ -493,6 +526,7 @@ function renderSubjects() {
     html += "<td>" + escapeHtml(subject.credits) + "</td>";
     html += "<td>" + escapeHtml(subject.category) + "</td>";
     html += "<td>" + escapeHtml(subject.sub_category) + "</td>";
+    html += "<td>" + escapeHtml(subject.course) + "</td>";
     html += "<td>" + escapeHtml(subject.field) + "</td>";
     html += "<td>" + getRequirementBadge(subject.requirement_type) + "</td>";
     html += "<td>" + escapeHtml(subject.class_type) + "</td>";
@@ -519,7 +553,7 @@ function renderDeleteSubjects() {
   let html = "";
 
   if (customSubjects.length === 0) {
-    tbody.innerHTML = "<tr><td colspan='9'>追加した科目はありません</td></tr>";
+    tbody.innerHTML = "<tr><td colspan='10'>追加した科目はありません</td></tr>";
     return;
   }
 
@@ -530,6 +564,7 @@ function renderDeleteSubjects() {
     html += "<td>" + escapeHtml(subject.credits) + "</td>";
     html += "<td>" + escapeHtml(subject.category) + "</td>";
     html += "<td>" + escapeHtml(subject.sub_category) + "</td>";
+    html += "<td>" + escapeHtml(subject.course) + "</td>";
     html += "<td>" + escapeHtml(subject.field) + "</td>";
     html += "<td>" + getRequirementBadge(subject.requirement_type) + "</td>";
     html += "<td>" + escapeHtml(subject.class_type) + "</td>";
@@ -578,6 +613,18 @@ function toggleSubject(subjectId, checked) {
   renderResult();
 }
 
+// 追加フォームのコース入力欄を切り替える
+function updateNewCourseInput() {
+  const courseSelect = document.getElementById("addCourseSelect");
+  const newCourseLabel = document.getElementById("newCourseLabel");
+
+  if (courseSelect.value === "__new__") {
+    newCourseLabel.classList.remove("hidden-field");
+  } else {
+    newCourseLabel.classList.add("hidden-field");
+  }
+}
+
 // 追加フォームの分野入力欄を切り替える
 function updateNewFieldInput() {
   const fieldSelect = document.getElementById("addFieldSelect");
@@ -599,11 +646,21 @@ function addSubject() {
   const requirementType = document.getElementById("addRequirementSelect").value;
   const classType = document.getElementById("addClassTypeSelect").value;
   const oldNameInput = document.getElementById("addOldNameInput").value.trim();
+  let course = document.getElementById("addCourseSelect").value;
   let field = document.getElementById("addFieldSelect").value;
 
   if (name === "") {
     setMessage("addMessage", "科目名を入力してください");
     return;
+  }
+
+  if (course === "__new__") {
+    course = document.getElementById("addNewCourseInput").value.trim();
+
+    if (course === "") {
+      setMessage("addMessage", "新しいコースを入力してください");
+      return;
+    }
   }
 
   if (field === "__new__") {
@@ -622,6 +679,7 @@ function addSubject() {
     requirement_type: requirementType,
     category: category,
     sub_category: subCategory,
+    course: course === "" ? null : course,
     field: field,
     class_type: classType,
     old_name: oldNameInput === "" ? null : oldNameInput
@@ -641,6 +699,7 @@ function addSubject() {
 function clearAddForm() {
   document.getElementById("addNameInput").value = "";
   document.getElementById("addOldNameInput").value = "";
+  document.getElementById("addNewCourseInput").value = "";
   document.getElementById("addNewFieldInput").value = "";
 }
 
@@ -931,6 +990,7 @@ function setupEvents() {
   document.getElementById("searchInput").addEventListener("input", renderSubjects);
   document.getElementById("categorySelect").addEventListener("change", renderSubjects);
   document.getElementById("subCategorySelect").addEventListener("change", renderSubjects);
+  document.getElementById("courseSelect").addEventListener("change", renderSubjects);
   document.getElementById("requirementSelect").addEventListener("change", renderSubjects);
 
 
@@ -950,6 +1010,7 @@ function setupEvents() {
     showView("main");
   });
 
+  document.getElementById("addCourseSelect").addEventListener("change", updateNewCourseInput);
   document.getElementById("addFieldSelect").addEventListener("change", updateNewFieldInput);
   document.getElementById("addSubjectButton").addEventListener("click", addSubject);
   document.getElementById("deleteAddedSubjectButton").addEventListener("click", deleteSelectedAddedSubjects);
