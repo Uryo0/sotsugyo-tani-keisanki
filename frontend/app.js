@@ -928,6 +928,7 @@ function renderResult() {
     status.className = "status-text status-ng";
   }
 
+  renderSummary(result);
   renderRequirementList(result.checks);
   renderMissingRequired(result.missingRequiredSubjects);
   renderMissingChoice(result.choiceShortages);
@@ -1041,19 +1042,105 @@ function moveProgressBars() {
   }
 }
 
+// ゲージの色を決める
+function getRequirementStatusClass(check) {
+  const shortage = Math.max(0, check.required - check.earned);
+
+  if (shortage === 0) {
+    return "requirement-good";
+  }
+
+  if (shortage <= 4) {
+    return "requirement-warning";
+  }
+
+  return "requirement-danger";
+}
+
+// 上部のまとめに出す不足項目を取り出す
+function getSummaryShortageChecks(checks) {
+  const names = [
+    "教養必修",
+    "教養選択必修",
+    "教養・保健体育の選択",
+    "必修英語",
+    "同一外国語",
+    "専門基幹・専門基礎の必修",
+    "数学分野の選択必修",
+    "専門基幹・専門基礎の選択",
+    "専門応用の必修",
+    "プログラミング選択必修",
+    "専門応用の選択",
+    "理工学科専門応用",
+    "自主選択学修"
+  ];
+  const shortageChecks = [];
+
+  for (const name of names) {
+    const check = findCheck(checks, name);
+
+    if (check !== null && !check.ok) {
+      shortageChecks.push(check);
+    }
+  }
+
+  return shortageChecks;
+}
+
+// 上部のまとめ用の不足文を作る
+function makeSummaryShortageText(check) {
+  const shortage = Math.max(0, check.required - check.earned);
+  const text = getRequirementText(check.name);
+  let label = text.label;
+
+  if (check.name.startsWith("同一外国語")) {
+    label += check.name.replace("同一外国語", "");
+  }
+
+  return label + " " + shortage + "単位";
+}
+
+// 上部のまとめを表示する
+function renderSummary(result) {
+  const area = document.getElementById("summaryPanel");
+  const totalCheck = findCheck(result.checks, "総単位");
+  const totalShortage = Math.max(0, totalCheck.required - totalCheck.earned);
+  const shortageChecks = getSummaryShortageChecks(result.checks);
+  const shortageTexts = [];
+  const maxTextCount = 4;
+
+  for (let i = 0; i < shortageChecks.length && i < maxTextCount; i++) {
+    shortageTexts.push(makeSummaryShortageText(shortageChecks[i]));
+  }
+
+  if (shortageChecks.length > maxTextCount) {
+    shortageTexts.push("ほか" + (shortageChecks.length - maxTextCount) + "項目");
+  }
+
+  if (result.missingRequiredSubjects.length > 0) {
+    shortageTexts.push("未修得必修 " + result.missingRequiredSubjects.length + "科目");
+  }
+
+  const shortageText = shortageTexts.length === 0 ? "不足: なし" : "不足: " + shortageTexts.join("、");
+  const panelClass = result.graduationOk ? "summary-panel summary-ok" : "summary-panel summary-ng";
+
+  area.className = panelClass;
+  area.innerHTML = "<div class='summary-main'>総単位 " + escapeHtml(totalCheck.earned) + " / " + escapeHtml(totalCheck.required) + "（あと" + escapeHtml(totalShortage) + "単位）</div><div class='summary-shortage'>" + escapeHtml(shortageText) + "</div>";
+}
+
 // 1つの要件を表示する
 function renderRequirementItem(check, className) {
   if (check === null) {
     return "";
   }
 
-  const okClass = check.ok ? "ok" : "ng";
+  const statusClass = getRequirementStatusClass(check);
   const percent = Math.min(100, Math.round((check.earned / check.required) * 100));
   const beforePercent = previousPercents[check.name] === undefined ? 0 : previousPercents[check.name];
   const text = getRequirementText(check.name);
 
   let html = "";
-  html += "<div class='requirement-item " + okClass + " " + className + "'>";
+  html += "<div class='requirement-item " + statusClass + " " + className + "'>";
   html += "<div class='requirement-head'>";
   html += "<span class='requirement-name'>" + text.label + "</span>";
   html += "<span class='requirement-number'>" + check.earned + " / " + check.required + " 単位</span>";

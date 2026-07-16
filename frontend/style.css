@@ -69,6 +69,38 @@ h2 {
   color: #ffb0a8;
 }
 
+.summary-panel {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin: 14px 18px 0;
+  padding: 12px 16px;
+  border: 1px solid #d9e0e7;
+  border-radius: 8px;
+  background: #ffffff;
+  line-height: 1.5;
+}
+
+.summary-main {
+  font-weight: 700;
+}
+
+.summary-shortage {
+  color: #44515e;
+  font-size: 13px;
+}
+
+.summary-ok {
+  border-color: #b8d9c5;
+  background: #edf8f0;
+}
+
+.summary-ng {
+  border-color: #e7b8b2;
+  background: #fff4f2;
+}
+
 .hidden-view {
   display: none !important;
 }
@@ -196,11 +228,23 @@ h2 {
   transition: width 0.55s ease, background-color 0.2s ease;
 }
 
-.requirement-item.ok .progress-fill {
+.requirement-item.requirement-good .progress-fill {
   background: #2e9d63;
 }
 
-.requirement-item.ng .progress-fill {
+.requirement-item.requirement-warning {
+  border-color: #e1bf6f;
+}
+
+.requirement-item.requirement-warning .progress-fill {
+  background: #c58a00;
+}
+
+.requirement-item.requirement-danger {
+  border-color: #e4aaa4;
+}
+
+.requirement-item.requirement-danger .progress-fill {
   background: #d84a3a;
 }
 
@@ -451,6 +495,11 @@ tr:hover {
 
   .table-wrap {
     min-height: 560px;
+  }
+
+  .summary-panel {
+    align-items: flex-start;
+    flex-direction: column;
   }
 }
 .requirement-inline-control {
