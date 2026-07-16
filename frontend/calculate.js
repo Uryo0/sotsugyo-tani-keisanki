@@ -124,6 +124,39 @@ function isDirectFreeSubject(subject) {
   return subject.counts_as === "自主選択学修";
 }
 
+// 選択必修の候補科目を取り出す
+function getChoiceCandidateSubjects(subjects, selectedIds, checkFunction) {
+  const candidateSubjects = [];
+
+  for (const subject of subjects) {
+    if (selectedIds.includes(subject.id)) {
+      continue;
+    }
+
+    if (isDirectFreeSubject(subject)) {
+      continue;
+    }
+
+    if (checkFunction(subject)) {
+      candidateSubjects.push(subject);
+    }
+  }
+
+  return candidateSubjects;
+}
+
+// 選択必修の不足情報を作る
+function makeChoiceShortage(name, earned, required, candidateSubjects) {
+  return {
+    name: name,
+    earned: earned,
+    required: required,
+    shortage: Math.max(0, required - earned),
+    candidateCount: candidateSubjects.length,
+    candidateSubjects: candidateSubjects
+  };
+}
+
 // 卒業要件を計算する
 function calculateResult(subjects, selectedIds, requirements, mainLanguage) {
   const selectedSubjects = getSelectedSubjects(subjects, selectedIds);
@@ -242,6 +275,23 @@ function calculateResult(subjects, selectedIds, requirements, mainLanguage) {
     makeCheck("自主選択学修", freeCredits, requirements.freeCredits)
   ];
 
+  const choiceShortages = [
+    makeChoiceShortage("教養選択必修", usedLiberalChoice, requirements.common.liberalChoiceRequiredCredits, getChoiceCandidateSubjects(subjects, selectedIds, function (subject) {
+      return subject.sub_category === "教養" && subject.requirement_type === "選択必修";
+    })),
+    makeChoiceShortage("同一外国語（" + language + "）", usedMainLanguageChoice, requirements.common.sameLanguageChoiceCredits, getChoiceCandidateSubjects(subjects, selectedIds, function (subject) {
+      return subject.sub_category === "外国語" && subject.requirement_type === "選択必修" && getLanguageName(subject) === language;
+    })),
+    makeChoiceShortage("数学分野の選択必修", usedMathChoice, requirements.professional.mathChoiceCredits, getChoiceCandidateSubjects(subjects, selectedIds, function (subject) {
+      return subject.sub_category === "専門基幹" && subject.field === "数学" && subject.requirement_type === "選択必修";
+    })),
+    makeChoiceShortage("プログラミング選択必修", usedProgrammingChoice, requirements.professional.programmingChoiceCredits, getChoiceCandidateSubjects(subjects, selectedIds, function (subject) {
+      return isMainCourseApplied(subject) && subject.field === "プログラミング" && subject.requirement_type === "選択必修";
+    }))
+  ].filter(function (choiceShortage) {
+    return choiceShortage.shortage > 0;
+  });
+
   let allChecksOk = true;
 
   for (const check of checks) {
@@ -256,6 +306,7 @@ function calculateResult(subjects, selectedIds, requirements, mainLanguage) {
     checks: checks,
     missingRequiredSubjects: missingRequiredSubjects,
     missingRegisterSubjects: missingRegisterSubjects,
+    choiceShortages: choiceShortages,
     graduationOk: allChecksOk && missingRequiredSubjects.length === 0
   };
 }

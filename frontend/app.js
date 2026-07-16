@@ -8,6 +8,7 @@ let requirements = {};
 let selectedIds = [];
 let mainLanguage = "英語";
 let previousPercents = {};
+let choiceCandidateFilter = "";
 
 const dataVersion = 1;
 const stateSaveKey = "sotsugyo-tani-keisanki-state";
@@ -461,8 +462,10 @@ function setupMainLanguageOptions() {
 
   select.addEventListener("change", function () {
     mainLanguage = this.value;
+    choiceCandidateFilter = "";
     saveMainLanguage();
     renderResult();
+    renderSubjects();
   });
 }
 
@@ -492,6 +495,103 @@ function getLanguageValues() {
   }
 
   return values;
+}
+
+// 選択必修の候補表示で使う言語名を取り出す
+function getChoiceLanguageName(filterName) {
+  const startIndex = filterName.indexOf("（");
+  const endIndex = filterName.indexOf("）");
+
+  if (startIndex === -1 || endIndex === -1) {
+    return mainLanguage;
+  }
+
+  return filterName.slice(startIndex + 1, endIndex);
+}
+
+// 情報ネット・メディアコースの専門応用科目か調べる
+function isInfoCourseAppliedSubject(subject) {
+  if (subject.sub_category !== "専門応用") {
+    return false;
+  }
+
+  return subject.course === "情報ネット・メディアコース" || subject.course === null || subject.course === undefined || subject.course === "";
+}
+
+// 選択必修の候補に入る科目か調べる
+function isChoiceCandidate(subject, filterName) {
+  if (subject.counts_as === "自主選択学修") {
+    return false;
+  }
+
+  if (filterName === "教養選択必修") {
+    return subject.sub_category === "教養" && subject.requirement_type === "選択必修";
+  }
+
+  if (filterName.startsWith("同一外国語")) {
+    const language = getChoiceLanguageName(filterName);
+    return subject.sub_category === "外国語" && subject.requirement_type === "選択必修" && getLanguageName(subject) === language;
+  }
+
+  if (filterName === "数学分野の選択必修") {
+    return subject.sub_category === "専門基幹" && subject.field === "数学" && subject.requirement_type === "選択必修";
+  }
+
+  if (filterName === "プログラミング選択必修") {
+    return isInfoCourseAppliedSubject(subject) && subject.field === "プログラミング" && subject.requirement_type === "選択必修";
+  }
+
+  return false;
+}
+
+// 選択必修の不足名を画面用にする
+function getChoiceShortageLabel(name) {
+  const text = getRequirementText(name);
+
+  if (name.startsWith("同一外国語")) {
+    return text.label + name.replace("同一外国語", "");
+  }
+
+  return text.label;
+}
+
+// 選択必修の候補表示を解除する
+function clearChoiceCandidateFilter() {
+  choiceCandidateFilter = "";
+  renderSubjects();
+}
+
+// 検索や分類を自分で変えた時に候補表示を解除する
+function handleFilterChange() {
+  choiceCandidateFilter = "";
+  renderSubjects();
+}
+
+// 選択必修の候補だけを一覧に表示する
+function showChoiceCandidates(filterName) {
+  choiceCandidateFilter = filterName;
+  document.getElementById("searchInput").value = "";
+  document.getElementById("categorySelect").value = "all";
+  document.getElementById("subCategorySelect").value = "all";
+  document.getElementById("courseSelect").value = "all";
+  document.getElementById("requirementSelect").value = "all";
+  renderSubjects();
+}
+
+// 候補表示中の案内を表示する
+function renderCandidateFilterInfo(filteredSubjects) {
+  const area = document.getElementById("candidateFilterInfo");
+
+  if (choiceCandidateFilter === "") {
+    area.classList.add("hidden-field");
+    area.innerHTML = "";
+    return;
+  }
+
+  area.classList.remove("hidden-field");
+  area.innerHTML = "<span>" + escapeHtml(getChoiceShortageLabel(choiceCandidateFilter)) + "の候補を表示中（" + filteredSubjects.length + "科目）</span><button id='clearCandidateFilterButton' type='button'>解除</button>";
+
+  document.getElementById("clearCandidateFilterButton").addEventListener("click", clearChoiceCandidateFilter);
 }
 
 // 表示する科目を絞り込む
@@ -524,6 +624,10 @@ function getFilteredSubjects() {
     }
 
     if (requirementType !== "all" && subject.requirement_type !== requirementType) {
+      continue;
+    }
+
+    if (choiceCandidateFilter !== "" && !isChoiceCandidate(subject, choiceCandidateFilter)) {
       continue;
     }
 
@@ -569,6 +673,7 @@ function renderSubjects() {
   }
 
   document.getElementById("shownCount").textContent = "表示 " + filteredSubjects.length + "科目";
+  renderCandidateFilterInfo(filteredSubjects);
 }
 
 // 削除画面の追加科目を表示する
@@ -825,6 +930,7 @@ function renderResult() {
 
   renderRequirementList(result.checks);
   renderMissingRequired(result.missingRequiredSubjects);
+  renderMissingChoice(result.choiceShortages);
   renderWarnings(result.missingRegisterSubjects);
 }
 
@@ -1037,6 +1143,63 @@ function renderMissingRequired(missingSubjects) {
   list.innerHTML = html;
 }
 
+// 候補科目名を短く表示する
+function makeCandidatePreview(candidateSubjects) {
+  if (candidateSubjects.length === 0) {
+    return "候補科目がありません";
+  }
+
+  const names = [];
+  const maxCount = 4;
+
+  for (let i = 0; i < candidateSubjects.length && i < maxCount; i++) {
+    names.push(candidateSubjects[i].name);
+  }
+
+  let text = names.join("、");
+
+  if (candidateSubjects.length > maxCount) {
+    text += "、ほか" + (candidateSubjects.length - maxCount) + "科目";
+  }
+
+  return text;
+}
+
+// 不足している選択必修を表示する
+function renderMissingChoice(choiceShortages) {
+  const list = document.getElementById("missingChoiceList");
+
+  if (choiceShortages === undefined || choiceShortages.length === 0) {
+    list.innerHTML = "<li>なし</li>";
+    return;
+  }
+
+  let html = "";
+
+  for (const choiceShortage of choiceShortages) {
+    const label = getChoiceShortageLabel(choiceShortage.name);
+    const preview = makeCandidatePreview(choiceShortage.candidateSubjects);
+
+    html += "<li>";
+    html += "<button class='choice-shortage-button' type='button' data-choice-name='" + escapeHtml(choiceShortage.name) + "'>";
+    html += "<span class='choice-shortage-title'>" + escapeHtml(label) + "</span>";
+    html += "<span>あと" + escapeHtml(choiceShortage.shortage) + "単位（候補" + escapeHtml(choiceShortage.candidateCount) + "科目）</span>";
+    html += "</button>";
+    html += "<div class='choice-candidates'>" + escapeHtml(preview) + "</div>";
+    html += "</li>";
+  }
+
+  list.innerHTML = html;
+
+  const buttons = document.querySelectorAll(".choice-shortage-button");
+
+  for (const button of buttons) {
+    button.addEventListener("click", function () {
+      showChoiceCandidates(this.dataset.choiceName);
+    });
+  }
+}
+
 // 注意を表示する
 function renderWarnings(missingRegisterSubjects) {
   const list = document.getElementById("warningList");
@@ -1055,11 +1218,11 @@ function renderWarnings(missingRegisterSubjects) {
 
 // ボタンなどの動きを設定する
 function setupEvents() {
-  document.getElementById("searchInput").addEventListener("input", renderSubjects);
-  document.getElementById("categorySelect").addEventListener("change", renderSubjects);
-  document.getElementById("subCategorySelect").addEventListener("change", renderSubjects);
-  document.getElementById("courseSelect").addEventListener("change", renderSubjects);
-  document.getElementById("requirementSelect").addEventListener("change", renderSubjects);
+  document.getElementById("searchInput").addEventListener("input", handleFilterChange);
+  document.getElementById("categorySelect").addEventListener("change", handleFilterChange);
+  document.getElementById("subCategorySelect").addEventListener("change", handleFilterChange);
+  document.getElementById("courseSelect").addEventListener("change", handleFilterChange);
+  document.getElementById("requirementSelect").addEventListener("change", handleFilterChange);
 
 
   document.getElementById("openAddViewButton").addEventListener("click", function () {
@@ -1091,6 +1254,7 @@ function setupEvents() {
   document.getElementById("clearButton").addEventListener("click", function () {
     if (confirm("選択をすべてクリアしますか？")) {
       selectedIds = [];
+      choiceCandidateFilter = "";
       saveSelectedIds();
       renderSubjects();
       renderResult();

@@ -471,3 +471,50 @@ tr:hover {
   flex: 0 1 180px;
   min-width: 150px;
 }
+
+.choice-shortage-button {
+  width: 100%;
+  min-height: 0;
+  padding: 8px 10px;
+  border-color: #d9e0e7;
+  color: #1d2733;
+  text-align: left;
+  white-space: normal;
+  background: #f8fafc;
+}
+
+.choice-shortage-button:hover {
+  background: #eef5ff;
+}
+
+.choice-shortage-title {
+  display: block;
+  margin-bottom: 2px;
+  font-weight: 700;
+}
+
+.choice-candidates {
+  margin-top: 5px;
+  color: #5e6b77;
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.candidate-filter-info {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 8px;
+  padding: 8px 10px;
+  border: 1px solid #b9d0ef;
+  border-radius: 6px;
+  color: #244a75;
+  background: #eef5ff;
+  font-size: 13px;
+}
+
+.candidate-filter-info button {
+  min-height: 30px;
+  padding: 0 10px;
+}
