@@ -670,7 +670,7 @@ function renderSubjects() {
     const rowClass = rowClasses.length === 0 ? "" : " class='" + rowClasses.join(" ") + "'";
 
     html += "<tr" + rowClass + ">";
-    html += "<td class='check-column'><input class='subject-check' type='checkbox' data-id='" + escapeHtml(subject.id) + "' " + checked + "></td>";
+    html += "<td class='check-column'><label class='round-check' aria-label='科目を選択'><input class='subject-check' type='checkbox' data-id='" + escapeHtml(subject.id) + "' " + checked + "><span></span></label></td>";
     html += "<td>" + escapeHtml(subject.name) + "</td>";
     html += "<td>" + escapeHtml(subject.credits) + "</td>";
     html += "<td>" + escapeHtml(subject.category) + "</td>";
@@ -710,7 +710,7 @@ function renderDeleteSubjects() {
 
   for (const subject of customSubjects) {
     html += "<tr class='added-subject-row'>";
-    html += "<td class='check-column'><input class='delete-subject-check' type='checkbox' data-id='" + escapeHtml(subject.id) + "'></td>";
+    html += "<td class='check-column'><label class='round-check' aria-label='削除する科目を選択'><input class='delete-subject-check' type='checkbox' data-id='" + escapeHtml(subject.id) + "'><span></span></label></td>";
     html += "<td>" + escapeHtml(subject.name) + "</td>";
     html += "<td>" + escapeHtml(subject.credits) + "</td>";
     html += "<td>" + escapeHtml(subject.category) + "</td>";

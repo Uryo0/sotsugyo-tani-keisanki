@@ -377,10 +377,67 @@ tr:hover {
   text-align: center;
 }
 
-.subject-check,
-.delete-subject-check {
-  width: 18px;
-  height: 18px;
+.round-check {
+  display: inline-flex;
+  position: relative;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  cursor: pointer;
+  vertical-align: middle;
+}
+
+.round-check input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.round-check span {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  width: 20px;
+  height: 20px;
+  border: 2px solid #9aa9b5;
+  border-radius: 50%;
+  background: #ffffff;
+  transition: background-color 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.round-check span::after {
+  content: "";
+  width: 5px;
+  height: 9px;
+  margin-top: -2px;
+  border-right: 2px solid transparent;
+  border-bottom: 2px solid transparent;
+  transform: rotate(45deg) scale(0);
+  transition: transform 0.15s ease, border-color 0.15s ease;
+}
+
+.round-check:hover span {
+  border-color: #2f7d57;
+}
+
+.round-check input:checked + span {
+  border-color: #2f7d57;
+  background: #2f7d57;
+  box-shadow: 0 0 0 3px #e3f4eb;
+}
+
+.round-check input:checked + span::after {
+  border-color: #ffffff;
+  transform: rotate(45deg) scale(1);
+}
+
+.round-check input:focus-visible + span {
+  outline: 3px solid #b8d8ff;
+  outline-offset: 2px;
 }
 
 .badge {
