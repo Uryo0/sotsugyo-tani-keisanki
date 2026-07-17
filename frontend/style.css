@@ -482,6 +482,14 @@ tr:hover {
   background: #edf8f0;
 }
 
+.selected-subject-row {
+  background: #fff8e6;
+}
+
+.selected-subject-row:hover {
+  background: #fff0c2;
+}
+
 @media (max-width: 1200px) {
   .form-grid {
     grid-template-columns: repeat(3, minmax(140px, 1fr));

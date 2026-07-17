@@ -567,6 +567,17 @@ function handleFilterChange() {
   renderSubjects();
 }
 
+// 検索と絞り込みを解除する
+function clearSubjectFilters() {
+  choiceCandidateFilter = "";
+  document.getElementById("searchInput").value = "";
+  document.getElementById("categorySelect").value = "all";
+  document.getElementById("subCategorySelect").value = "all";
+  document.getElementById("courseSelect").value = "all";
+  document.getElementById("requirementSelect").value = "all";
+  renderSubjects();
+}
+
 // 選択必修の候補だけを一覧に表示する
 function showChoiceCandidates(filterName) {
   choiceCandidateFilter = filterName;
@@ -644,8 +655,19 @@ function renderSubjects() {
   let html = "";
 
   for (const subject of filteredSubjects) {
-    const checked = selectedIds.includes(subject.id) ? "checked" : "";
-    const rowClass = isCustomSubject(subject.id) ? " class='added-subject-row'" : "";
+    const isSelected = selectedIds.includes(subject.id);
+    const checked = isSelected ? "checked" : "";
+    const rowClasses = [];
+
+    if (isCustomSubject(subject.id)) {
+      rowClasses.push("added-subject-row");
+    }
+
+    if (isSelected) {
+      rowClasses.push("selected-subject-row");
+    }
+
+    const rowClass = rowClasses.length === 0 ? "" : " class='" + rowClasses.join(" ") + "'";
 
     html += "<tr" + rowClass + ">";
     html += "<td class='check-column'><input class='subject-check' type='checkbox' data-id='" + escapeHtml(subject.id) + "' " + checked + "></td>";
@@ -740,6 +762,7 @@ function toggleSubject(subjectId, checked) {
   }
 
   saveSelectedIds();
+  renderSubjects();
   renderResult();
 }
 
@@ -892,6 +915,10 @@ function deleteSelectedAddedSubjects() {
     return;
   }
 
+  if (!confirm(deleteIds.length + "件の追加科目を削除しますか？")) {
+    return;
+  }
+
   customSubjects = customSubjects.filter(function (subject) {
     return !deleteIds.includes(subject.id);
   });
@@ -916,7 +943,7 @@ function renderResult() {
   const result = calculateResult(subjects, selectedIds, requirements, mainLanguage);
 
   document.getElementById("totalCredits").textContent = result.totalCredits;
-  document.getElementById("selectedCount").textContent = "選択中 " + result.selectedCount + "科目";
+  document.getElementById("selectedCount").textContent = "選択中 " + result.selectedCount + "科目 / " + result.totalCredits + "単位";
 
   const status = document.getElementById("graduationStatus");
 
@@ -1310,6 +1337,7 @@ function setupEvents() {
   document.getElementById("subCategorySelect").addEventListener("change", handleFilterChange);
   document.getElementById("courseSelect").addEventListener("change", handleFilterChange);
   document.getElementById("requirementSelect").addEventListener("change", handleFilterChange);
+  document.getElementById("resetFilterButton").addEventListener("click", clearSubjectFilters);
 
 
   document.getElementById("openAddViewButton").addEventListener("click", function () {

@@ -4,11 +4,11 @@
 
 ## 起動方法（利用者向け）
 
-1. GitHub Releasesから `sotsugyo-tani-keisanki-v1.3.0.exe` をダウンロードします。
+1. GitHub Releasesから `sotsugyo-tani-keisanki-v1.4.0.exe` をダウンロードします。
 2. ダウンロードした `.exe` をダブルクリックします。
 3. Windowsの警告が出た場合は、内容を確認して実行します。
 
-Releaseページ: https://github.com/Uryo0/sotsugyo-tani-keisanki/releases/tag/v1.3.0
+Releaseページ: https://github.com/Uryo0/sotsugyo-tani-keisanki/releases/tag/v1.4.0
 
 ## 開発者向けの起動方法
 
@@ -34,6 +34,8 @@ npm run dist
 - 不足している選択必修と候補科目を表示する
 - 単位表示の「同一外国語科目」でメインにする外国語を選択する
 - 科目名と旧科目名で検索する
+- 検索・絞り込みをまとめて解除する
+- 選択済み科目の行を色で表示する
 - アプリ画面から科目を追加する
 - 追加した科目だけを削除する
 - 自主選択学修に直接入る科目を計算する
