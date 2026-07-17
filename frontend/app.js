@@ -112,10 +112,13 @@ function loadState() {
   if (savedStateText !== null) {
     const state = parseSavedJson(savedStateText, null);
 
-    if (state !== null) {
+    if (state !== null && state.dataVersion === dataVersion) {
       applyState(state);
       return;
     }
+
+    resetState();
+    return;
   }
 
   loadOldState();
@@ -148,6 +151,14 @@ function loadOldState() {
   }
 
   addCounter = getMaxAddNumber();
+}
+
+// 保存データを初期状態に戻す
+function resetState() {
+  selectedIds = [];
+  mainLanguage = "英語";
+  customSubjects = [];
+  addCounter = 0;
 }
 
 // 保存済みデータを画面用の変数に入れる
@@ -226,6 +237,19 @@ function cleanSelectedIds() {
   selectedIds = newSelectedIds;
 }
 
+
+// 対象年度を表示する
+function renderTargetInfo() {
+  const target = document.getElementById("targetInfo");
+
+  if (target === null) {
+    return;
+  }
+
+  const targetYears = requirements.target_years || requirements.studentYear || "";
+  const targetCourse = requirements.course || "";
+  target.textContent = "対象: " + targetYears + " " + targetCourse + "生";
+}
 
 // 画面を切り替える
 function showView(viewName) {
@@ -1319,12 +1343,12 @@ function renderWarnings(missingRegisterSubjects) {
   const list = document.getElementById("warningList");
   let html = "";
 
-  for (const subject of missingRegisterSubjects) {
-    html += "<li>登録必須: " + escapeHtml(subject.name) + "</li>";
-  }
+  html += "<li>本アプリの計算結果は参考値です。正式な卒業判定は必ず大学の成績表・履修要綱で確認してください。</li>";
+  html += "<li>本アプリは修得済み単位の計算のみを行います。登録必須科目の登録義務、卒業研究の履修資格、履修制限単位数などは判定できません。</li>";
+  html += "<li>成績表で単位を修得した科目のみチェックしてください。不可の科目は含めないでください。検定等で単位認定を受けた科目は修得済みとしてチェックしてください。</li>";
 
-  if (html === "") {
-    html = "<li>なし</li>";
+  for (const subject of missingRegisterSubjects) {
+    html += "<li>未修得の登録必須科目: " + escapeHtml(subject.name) + "</li>";
   }
 
   list.innerHTML = html;
@@ -1378,6 +1402,7 @@ function setupEvents() {
 }
 
 loadData();
+renderTargetInfo();
 setupSelectOptions();
 setupEvents();
 showView("main");
