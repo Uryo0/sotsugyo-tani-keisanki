@@ -11,11 +11,11 @@
 
 ## 起動方法（利用者向け）
 
-1. GitHub Releasesから `sotsugyo-tani-keisanki-v1.4.0.exe` をダウンロードします。
+1. GitHub Releasesから `sotsugyo-tani-keisanki-v1.5.0.exe` をダウンロードします。
 2. ダウンロードした `.exe` をダブルクリックします。
 3. Windowsの警告が出た場合は、「詳細情報」を押してから「実行」を押します。
 
-Releaseページ: https://github.com/Uryo0/sotsugyo-tani-keisanki/releases/tag/v1.4.0
+Releaseページ: https://github.com/Uryo0/sotsugyo-tani-keisanki/releases/tag/v1.5.0
 
 ## Windowsの警告が出た場合
 
