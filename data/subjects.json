@@ -31,7 +31,7 @@
   { "id": "complex005", "name": "ソーシャルサービス", "credits": 2, "requirement_type": "選択", "category": "共通", "sub_category": "教養", "field": "複合", "class_type": "演習", "old_name": null },
   { "id": "complex006", "name": "ＫＧＵキャリアデザイン入門1", "credits": 1, "requirement_type": "登録必須", "category": "共通", "sub_category": "教養", "field": "複合", "class_type": "講義", "old_name": null },
   { "id": "complex007", "name": "ＫＧＵキャリアデザイン入門2", "credits": 1, "requirement_type": "登録必須", "category": "共通", "sub_category": "教養", "field": "複合", "class_type": "講義", "old_name": null },
-  { "id": "complex008", "name": "ＫＧＵキャリアスタディ", "credits": 1, "requirement_type": "登録必須", "category": "共通", "sub_category": "教養", "field": "複合", "class_type": "講義・演習", "old_name": null },
+  { "id": "complex008", "name": "ＫＧＵキャリアスタディ", "credits": 2, "requirement_type": "選択", "category": "共通", "sub_category": "教養", "field": "複合", "class_type": "講義", "old_name": null },
   { "id": "complex009", "name": "ＫＧＵキャリアデザイン基礎", "credits": 2, "requirement_type": "選択", "category": "共通", "sub_category": "教養", "field": "複合", "class_type": "講義・演習", "old_name": null },
   { "id": "complex010", "name": "ＫＧＵキャリアデザイン実践", "credits": 2, "requirement_type": "選択", "category": "共通", "sub_category": "教養", "field": "複合", "class_type": "演習", "old_name": null },
   { "id": "complex011", "name": "日本事情（自然）", "credits": 2, "requirement_type": "選択", "category": "共通", "sub_category": "教養", "field": "複合", "class_type": "講義", "old_name": null },
