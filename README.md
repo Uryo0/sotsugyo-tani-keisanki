@@ -11,11 +11,19 @@
 
 ## 起動方法（利用者向け）
 
-1. GitHub Releasesから `sotsugyo-tani-keisanki-v1.5.0.exe` をダウンロードします。
-2. ダウンロードした `.exe` をダブルクリックします。
+1. GitHub Releasesから `sotsugyo-tani-keisanki-v1.6.0.exe` をダウンロードします。
+2. ダウンロードした `.exe` をダブルクリックしてインストールします。
 3. Windowsの警告が出た場合は、「詳細情報」を押してから「実行」を押します。
 
-Releaseページ: https://github.com/Uryo0/sotsugyo-tani-keisanki/releases/tag/v1.5.0
+Releaseページ: https://github.com/Uryo0/sotsugyo-tani-keisanki/releases/tag/v1.6.0
+
+## 自動更新
+
+v1.6.0以降は、アプリ起動時に新しいバージョンがあるか自動で確認します。
+更新の準備ができたら、アプリを再起動して更新できます。
+
+v1.5.0以前のportable版を使っている場合は、自動更新されません。
+一度 `sotsugyo-tani-keisanki-v1.6.0.exe` をダウンロードしてインストールしてください。
 
 ## Windowsの警告が出た場合
 
