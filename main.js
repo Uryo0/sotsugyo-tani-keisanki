@@ -45,7 +45,7 @@ function setupAutoUpdate() {
     });
   });
 
-  autoUpdater.checkForUpdatesAndNotify();
+  autoUpdater.checkForUpdates();
 }
 
 // Electronの準備ができたら画面を開く
