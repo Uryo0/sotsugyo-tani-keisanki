@@ -11,19 +11,32 @@
 
 ## 起動方法（利用者向け）
 
-1. GitHub Releasesから `sotsugyo-tani-keisanki-v1.6.0.exe` をダウンロードします。
+1. GitHub Releasesから `sotsugyo-tani-keisanki-v1.6.1.exe` をダウンロードします。
 2. ダウンロードした `.exe` をダブルクリックしてインストールします。
 3. Windowsの警告が出た場合は、「詳細情報」を押してから「実行」を押します。
 
-Releaseページ: https://github.com/Uryo0/sotsugyo-tani-keisanki/releases/tag/v1.6.0
+Releaseページ: https://github.com/Uryo0/sotsugyo-tani-keisanki/releases/tag/v1.6.1
+
+## 追加・修正
+
+- 一部の科目データを履修要綱に合わせて修正しました。
+- 「防災・復興論」「震災に学ぶ」を自主選択学修として計算するようにしました。
+- 自動更新の通知が二重に出る可能性を修正しました。
+- 単位計算の確認用テストを追加しました。
+
+## ダウンロード
+
+sotsugyo-tani-keisanki-v1.6.1.exe をダウンロードして、ダブルクリックで起動してください。
 
 ## 自動更新
 
 v1.6.0以降は、アプリ起動時に新しいバージョンがあるか自動で確認します。
 更新の準備ができたら、アプリを再起動して更新できます。
 
+v1.6.0を使っている場合は、アプリ起動時にv1.6.1へ更新できます。
+
 v1.5.0以前のportable版を使っている場合は、自動更新されません。
-一度 `sotsugyo-tani-keisanki-v1.6.0.exe` をダウンロードしてインストールしてください。
+一度 `sotsugyo-tani-keisanki-v1.6.1.exe` をダウンロードしてインストールしてください。
 
 ## Windowsの警告が出た場合
 
@@ -45,7 +58,7 @@ npm install
 npm start
 ```
 
-完成版の `.exe` を作り直す場合は、次のコマンドを使います。
+配布用の `.exe` を作り直す場合は、次のコマンドを使います。
 
 ```bash
 npm run dist
