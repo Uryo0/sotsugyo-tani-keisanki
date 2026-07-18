@@ -15,8 +15,18 @@
     </div>
 
     <div class="total-box">
-      <div><span id="totalCredits">0</span><span class="total-small"> / 124 単位</span></div>
-      <p id="graduationStatus" class="status-text">未達成</p>
+      <div class="total-ring">
+        <svg viewBox="0 0 88 88" aria-hidden="true">
+          <circle class="total-ring-bg" cx="44" cy="44" r="36"></circle>
+          <circle id="totalProgressCircle" class="total-ring-fill" cx="44" cy="44" r="36"></circle>
+        </svg>
+        <span id="totalPercent">0%</span>
+      </div>
+      <div class="total-detail">
+        <div><span id="totalCredits">0</span><span class="total-small"> / 124 単位</span></div>
+        <p id="graduationStatus" class="status-text">未達成</p>
+        <p id="creditModeStatus" class="display-status">表示中: 履修済み</p>
+      </div>
     </div>
   </header>
 
@@ -26,6 +36,40 @@
   </section>
 
   <main id="mainView" class="view main-layout">
+    <div class="toolbar">
+      <input id="searchInput" type="search" placeholder="科目名・旧科目名で検索">
+
+      <select id="categorySelect">
+        <option value="all">すべての分類</option>
+      </select>
+
+      <select id="subCategorySelect">
+        <option value="all">すべての区分</option>
+      </select>
+
+      <select id="courseSelect">
+        <option value="all">すべてのコース</option>
+      </select>
+
+      <select id="requirementSelect">
+        <option value="all">すべての必選別</option>
+      </select>
+
+      <div class="toolbar-divider"></div>
+
+      <div id="creditDisplayControl" class="credit-display-control" role="switch" tabindex="0" aria-checked="false" aria-label="表示する単位">
+        <div id="modeThumb" class="mode-thumb" aria-hidden="true"></div>
+        <span class="mode-label active" data-mode="completed">履修済み</span>
+        <span class="mode-label" data-mode="forecast">履修中・予定</span>
+      </div>
+
+      <button id="resetFilterButton" type="button">絞り込み解除</button>
+      <button id="saveButton" type="button">保存</button>
+      <button id="openAddViewButton" type="button">科目を追加</button>
+      <button id="openDeleteViewButton" type="button" class="danger-button">追加した科目を削除</button>
+      <button id="clearButton" type="button" class="danger-button">クリア</button>
+    </div>
+
     <section class="left-area">
       <div id="requirementList" class="requirement-list"></div>
 
@@ -46,34 +90,6 @@
     </section>
 
     <section class="right-area">
-      <div class="toolbar">
-        <input id="searchInput" type="search" placeholder="科目名・旧科目名で検索">
-
-        <select id="categorySelect">
-          <option value="all">すべての分類</option>
-        </select>
-
-        <select id="subCategorySelect">
-          <option value="all">すべての区分</option>
-        </select>
-
-        <select id="courseSelect">
-          <option value="all">すべてのコース</option>
-        </select>
-
-        <select id="requirementSelect">
-          <option value="all">すべての必選別</option>
-        </select>
-
-
-        <button id="resetFilterButton" type="button">絞り込み解除</button>
-
-        <button id="saveButton" type="button">保存</button>
-        <button id="openAddViewButton" type="button">科目を追加</button>
-        <button id="openDeleteViewButton" type="button" class="danger-button">追加した科目を削除</button>
-        <button id="clearButton" type="button" class="danger-button">クリア</button>
-      </div>
-
       <div class="subject-info">
         <span id="selectedCount">選択中 0科目</span>
         <span id="shownCount">表示 0科目</span>
@@ -85,17 +101,17 @@
         <table>
           <thead>
             <tr>
-              <th class="check-column">修得</th>
+              <th class="status-column">履修状況</th>
               <th>科目名</th>
+              <th>旧科目名</th>
               <th>単位</th>
               <th>分類</th>
               <th>区分</th>
               <th>コース</th>
               <th>分野</th>
               <th>必選別</th>
-              <th>計算先</th>
               <th>授業形態</th>
-              <th>旧科目名</th>
+              <th>計算先</th>
             </tr>
           </thead>
           <tbody id="subjectTableBody"></tbody>
@@ -194,15 +210,15 @@
             <tr>
               <th class="check-column">選択</th>
               <th>科目名</th>
+              <th>旧科目名</th>
               <th>単位</th>
               <th>分類</th>
               <th>区分</th>
               <th>コース</th>
               <th>分野</th>
               <th>必選別</th>
-              <th>計算先</th>
               <th>授業形態</th>
-              <th>旧科目名</th>
+              <th>計算先</th>
             </tr>
           </thead>
           <tbody id="deleteSubjectTableBody"></tbody>
